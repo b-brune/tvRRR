@@ -214,7 +214,7 @@ BIC.tvRRR <- function(kf, d, model = "A", ...) {
 }
 
 #' @export
-MSFE.tvRRR <- function(kf, newdata = newdata, model = "A") {
+MSFE.tvRRR <- function(kf, newdata = NULL, model = "A") {
   yhat <- predict(kf, newdata = newdata)
   mean((newdata$y - yhat)^2)
 }

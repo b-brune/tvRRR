@@ -291,7 +291,7 @@ X_update_Gamma <- function(kf, Z) {
 #'
 #' Function that updates the parameters from the current output of the KF-function
 #' i.e. one updating step in the EM algorithm
-#' @param kf a kalman filter object, output from my_KFS function
+#' @param kf a Kalman filter object, output from eval_tvRRR() / filter_modelA() / filter_modelB() function
 #' @param p dimension of the target
 #' @param d latent dimension
 #' @param t length of the time series
@@ -320,6 +320,7 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
 ) {
 
   ## Put the stuff we need often into parameters:
+
   s <- kf$states$smoothed
 
   Z <- kf$data$Z
@@ -357,7 +358,7 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
 
   if (model == "A") {
 
-    beta_n <- kf$parameters$beta # "starting value for the algorithm"
+    beta_n  <- kf$parameters$beta # "starting value for the steps"
     Omega_n <- kf$parameters$Omega
     Gamma_n <- kf$parameters$Gamma
 
@@ -381,12 +382,16 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
                               kf = kf, p = p, t = t, q = q)
 
       # Conditions for stopping
-      if (norm(Omega_n - Omega, 'm') < tol |
-          grassmann_dist(beta_n, beta, normalized = T) < tol |
-          # norm(Gamma_n - Gamma, 'm') < tol |
-          iter > maxit) break
-
-      if (!is.null(Gamma)) if (norm(Gamma_n - Gamma, 'm') < tol) break
+      if (is.null(Gamma)) {
+        if (norm(Omega_n - Omega, 'm') < tol |
+            subsp_dist(beta_n, beta) < tol |
+            iter > maxit) break
+      } else if (!is.null(Gamma)) {
+        if (norm(Omega_n - Omega, 'm') < tol |
+            subsp_dist(beta_n, beta) < tol |
+            iter > maxit |
+            norm(Gamma_n - Gamma, 'm') < tol) break
+      }
 
       iter <- iter + 1
     }
