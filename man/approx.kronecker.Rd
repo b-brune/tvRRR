@@ -24,7 +24,7 @@ of dimensions \code{dimA} and \code{dimB} respectively.
 }
 \examples{
 A <- matrix(seq(14), 7, 2)
-B <- matrix(c(T, F), 3, 4)
+B <- matrix(c(TRUE, FALSE), 3, 4)
 C <- kronecker(A, B) # the same as 'C <- A \%x\% B'
 approx.kronecker(C, dim(A), dim(B))
 

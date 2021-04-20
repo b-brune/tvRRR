@@ -57,14 +57,13 @@ matpow <- function(A, pow, symmetric = FALSE, tol = 1e-7) {
 #'
 #' @examples
 #' A <- matrix(seq(14), 7, 2)
-#' B <- matrix(c(T, F), 3, 4)
+#' B <- matrix(c(TRUE, FALSE), 3, 4)
 #' C <- kronecker(A, B) # the same as 'C <- A %x% B'
 #' approx.kronecker(C, dim(A), dim(B))
 #'
 #' @seealso C.F. Van Loan / Journal of Computational and Applied Mathematics
 #'          123 (2000) 85-100 (pp. 93-95)
 #'
-#' @importFrom RSpectra svds
 #' @export
 approx.kronecker <- function(C, dimA, dimB) {
 
@@ -72,21 +71,13 @@ approx.kronecker <- function(C, dimA, dimB) {
   R <- aperm(C, c(2L, 4L, 1L, 3L))
   dim(R) <- c(prod(dimA), prod(dimB))
 
-  svdR <- try(RSpectra::svds(R, 1L), silent = TRUE)
-  if (is(svdR, 'try-error')) {
-    svdR <- svd(R, 1L, 1L)
-  }
+  svdR <- svd(R, 1L, 1L)
 
   return(list(
     A = array(sqrt(svdR$d[1]) * svdR$u, dimA),
     B = array(sqrt(svdR$d[1]) * svdR$v, dimB)
   ))
 }
-
-#' notin
-#' @export
-`%notin%` <- Negate(`%in%`)
-
 
 #' Check whether a matrix is symmetric
 #' @export

@@ -9,12 +9,13 @@
 #'
 #' @param kf an object of class \code{tvRRR}
 #' @param type either \code{filtered} or \code{smoothed}, defaults to filtered
-#' @param model \code{"A"} or \code{"B"}, can be handed over, but is determined
-#' automatically from the tvRRR object
+#' @param model \code{"A"} or \code{"B"}, can be handed over, but otherwise is determined
+#' automatically from the \code{tvRRR} object
+#' @param ... ignored
 #'
 #' @export
 
-fitted.tvRRR <- function(kf, type = "filtered", model) {
+fitted.tvRRR <- function(kf, type = "filtered", model, ...) {
 
   if (missing(model)) model <- ifelse(is.null(kf$parameters$alpha), "A", "B")
 
@@ -48,8 +49,14 @@ fitted.tvRRR <- function(kf, type = "filtered", model) {
 
 
 #' Print Method for tvRRR object
+#'
+#' @param kf an object of class \code{tvRRR}
+#' @param ... ignored
+#'
+#' @returns A short summary of the \code{tvRRR} object.
+#'
 #' @export
-print.tvRRR <- function(kf) {
+print.tvRRR <- function(kf, ...) {
 
   d <- ifelse(is.null(kf$parameters$alpha), dim(kf$parameters$beta)[2], dim(kf$parameters$alpha)[2])
   model <- ifelse(is.null(kf$parameters$alpha), "A", "B")
@@ -87,13 +94,15 @@ print.tvRRR <- function(kf) {
 #'                      of the algorithm
 #'                }
 #' @param silent specifies whether a message should be printed regarding the type of prediction
+#' @param ... ignored
+#'
 #'
 #' @returns The predicted target variables in the specified setup (as a matrix)
 #'
 #' @export
 
 
-predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE) {
+predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE, ...) {
 
   if (is.null(newdata)) return(fitted.tvRRR(kf))
 
@@ -191,7 +200,7 @@ predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE) {
 ## ############################################################################
 
 #' @export
-BIC.tvRRR <- function(kf, d, model = "A") {
+BIC.tvRRR <- function(kf, d, model = "A", ...) {
 
   t <- nrow(kf$data$X)
 
@@ -214,20 +223,20 @@ MSFE.tvRRR <- function(kf, newdata = newdata, model = "A") {
 #' Burnham, Anderson (2004): Multimodel Inference: Understanding AIC and BIC in model selection
 #' Recommended if t / K < 40, but as it converges to zero with growing t it should be used anyway
 #' for that correction is set as default
-#' @export
-AIC.tvRRR <- function(kf, d, model = "A", correct = TRUE) {
-
-  t <- nrow(kf$data$X)
-
-  if (model == "A") {
-    K <- d * (d + 1) / 2 + ifelse(d > 1, prod(dim(kf$parameters$beta)), length(kf$parameters$beta))
-  } else if (model == "B") {
-    K <- d * (d + 1) / 2 + ifelse(d > 1, prod(dim(kf$parameters$alpha)), length(kf$parameters$alpha))
-  }
-
-  if (!correct) {
-    return(-2 * kf$likelihoods.logLik[kf$iter] + K * 2)
-  } else {
-    return(-2 * kf$likelihoods.loglik[kf$iter] + 2 * K + 2 * K * (K + 1) / (t - K - 1))
-  }
-}
+# #' @export
+# AIC.tvRRR <- function(kf, d, model = "A", correct = TRUE, ...) {
+#
+#   t <- nrow(kf$data$X)
+#
+#   if (model == "A") {
+#     K <- d * (d + 1) / 2 + ifelse(d > 1, prod(dim(kf$parameters$beta)), length(kf$parameters$beta))
+#   } else if (model == "B") {
+#     K <- d * (d + 1) / 2 + ifelse(d > 1, prod(dim(kf$parameters$alpha)), length(kf$parameters$alpha))
+#   }
+#
+#   if (!correct) {
+#     return(-2 * kf$likelihoods.logLik[kf$iter] + K * 2)
+#   } else {
+#     return(-2 * kf$likelihoods.loglik[kf$iter] + 2 * K + 2 * K * (K + 1) / (t - K - 1))
+#   }
+# }

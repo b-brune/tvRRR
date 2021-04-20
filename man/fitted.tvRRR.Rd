@@ -4,15 +4,17 @@
 \alias{fitted.tvRRR}
 \title{Calculate fitted values from tvRRR object}
 \usage{
-\method{fitted}{tvRRR}(kf, type = "filtered", model)
+\method{fitted}{tvRRR}(kf, type = "filtered", model, ...)
 }
 \arguments{
 \item{kf}{an object of class \code{tvRRR}}
 
 \item{type}{either \code{filtered} or \code{smoothed}, defaults to filtered}
 
-\item{model}{\code{"A"} or \code{"B"}, can be handed over, but is determined
-automatically from the tvRRR object}
+\item{model}{\code{"A"} or \code{"B"}, can be handed over, but otherwise is determined
+automatically from the \code{tvRRR} object}
+
+\item{...}{ignored}
 }
 \description{
 Calculate fitted values from tvRRR object

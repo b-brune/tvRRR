@@ -4,7 +4,15 @@
 \alias{print.tvRRR}
 \title{Print Method for tvRRR object}
 \usage{
-\method{print}{tvRRR}(kf)
+\method{print}{tvRRR}(kf, ...)
+}
+\arguments{
+\item{kf}{an object of class \code{tvRRR}}
+
+\item{...}{ignored}
+}
+\value{
+A short summary of the \code{tvRRR} object.
 }
 \description{
 Print Method for tvRRR object

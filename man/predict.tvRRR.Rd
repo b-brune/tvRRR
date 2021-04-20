@@ -4,18 +4,24 @@
 \alias{predict.tvRRR}
 \title{Predict method for tvRRR object}
 \usage{
-\method{predict}{tvRRR}(kf, newdata = NULL)
+\method{predict}{tvRRR}(kf, newdata = NULL, silent = FALSE, ...)
 }
 \arguments{
 \item{kf}{object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function}
 
 \item{newdata}{can be specified differently with differing behavior: \itemize{
-\item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called
+\item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called and
+fitted values for the initial data are calculated
 \item a named list of length 1 or 2 containing predictors X and u for predictions
 using the last state fitted
 \item a named list of length 2 or 3 containing targets y, predictors X and, optionally
-additional predictors u
+additional predictors u; here the estimated states are updated in every step
+of the algorithm
 }}
+
+\item{silent}{specifies whether a message should be printed regarding the type of prediction}
+
+\item{...}{ignored}
 }
 \value{
 The predicted target variables in the specified setup (as a matrix)

@@ -12,7 +12,7 @@ tvRRR(
   d,
   select_rank = TRUE,
   d_max,
-  criterion = c("AIC", "BIC"),
+  criterion = "BIC",
   correctAIC = TRUE,
   Sigma_init = 0.1,
   ...
