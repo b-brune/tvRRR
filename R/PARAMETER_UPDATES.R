@@ -184,7 +184,7 @@ X_calc_Q <- function(kf, p, d, q, t, return_C = FALSE, model = "A") {
 #' Calculate the true data likelihood based on the latent states
 #' @keywords internal
 #'
-X_eval_lik <- function(kf, Omega, beta = NULL, alpha = NULL, d, y, X) {
+X_eval_lik <- function(kf, Omega, beta = NULL, alpha = NULL, Gamma = NULL, d, y, X) {
 
   #s <- kf$states$smoothed
   s <- kf$states$onestepahead
@@ -193,7 +193,7 @@ X_eval_lik <- function(kf, Omega, beta = NULL, alpha = NULL, d, y, X) {
   q <- ncol(X)
   u <- kf$data$u
 
-  if (!is.null(u)) y <- t(t(y) - kf$parameters$Gamma %*% t(u))
+  if (!is.null(u)) y <- t(t(y) - Gamma %*% t(u))
 
 
   if (!is.null(beta)) {
@@ -298,7 +298,6 @@ X_update_Gamma <- function(kf, Z) {
 #' @param q dimension of the predictors
 #' @param tol tolerance for convergence in iterative parameter updating
 #' @param Omega_diagonal logical, indicates whether Omega is assumed to be diagonal
-#' @param calc_Q should the expected likelihood of the current parameter set be evaluated?
 #'
 #' @return
 #' List of updated parameters:
@@ -314,7 +313,6 @@ X_update_Gamma <- function(kf, Z) {
 update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the model
                         tol = 1e-3, maxit = 50,
                         Omega_diagonal = FALSE,
-                        calc_Q = TRUE,
                         model = "A"
                         # details on the estimation algorithms
 ) {
@@ -328,25 +326,11 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
   X <- kf$data$X
   u <- kf$data$u
 
-  if (calc_Q) {
+  # E-step: Evaluate the likelihood
+  tmp <- X_calc_Q(kf = kf, p = p, d = d, t = t, q = q, return_C = TRUE, model = model)
+  Q <- tmp$Q
+  C <- tmp$C
 
-    tmp <- X_calc_Q(kf = kf, p = p, d = d, t = t, q = q, return_C = TRUE, model = model)
-    Q <- tmp$Q
-    C <- tmp$C
-
-  } else {
-    Q <- NULL
-
-    C <- rowSums(
-      sapply(2:(t+1), function(i) {
-        tcrossprod(s[i, ]) + kf$covariances$`P_t^T`[i, ,] +
-          tcrossprod(s[i - 1, ]) + kf$covariances$`P_t^T`[i - 1, ,] -
-          (tcrossprod(s[i, ], s[i-1, ]) + kf$covariances$`P_t-1t-2^T`[i - 1, , ]) -
-          t(tcrossprod(s[i, ], s[i-1, ]) + kf$covariances$`P_t-1t-2^T`[i - 1, , ])
-      }))
-
-    if (model == "A") { C <- matrix(C, p * d, p * d) } else if (model == "B") { C <- matrix(C, q * d, q * d) }
-  }
 
   ## Update Sigma using the SVD based formulae we derived
 
@@ -435,7 +419,7 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
   }
 
 
-  list(Sigma = Sigma[, , drop = FALSE], #L = L,
+  list(Sigma = Sigma[, , drop = FALSE],
        Q = Q, # Q from previous run of the filter... not the new Q
        Omega = Omega_n,
        beta  = if (model == "A") beta_n else NULL,
