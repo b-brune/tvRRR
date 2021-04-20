@@ -158,7 +158,7 @@ predict.tvRRR <- function(kf, newdata = NULL) {
                         Gamma = kf$parameters$Gamma,
                         Omega = kf$parameters$Omega,
                         Sigma = kf$parameters$Sigma,
-                        P_00 = kf$covariances$`P_t^T`[t + 1 , , ],
+                        P_00 = kf$prediction_covariance,
                         d = d)
 
       if (model == "A") {
