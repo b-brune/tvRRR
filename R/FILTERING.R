@@ -26,8 +26,9 @@ eval_tvRRR <- function(X, y, u = NULL, d, model = "A", alpha, beta, ...) {
 
   if (model == "B") kf <- filter_modelB(X = X, y = y, u = u, alpha = alpha, beta_00 = t(beta), d = d, ...)
 
-  return(kf)
+  class(kf) <- "tvRRR"
 
+  return(kf)
 }
 
 
@@ -171,6 +172,7 @@ filter_modelA <- function(y, X, u = NULL,
            `P_t^T` = P_tT,
            `P_t-1t-2^T` = P_cov)
     } else NULL,
+    prediction_covariance = `P_t^T`[t + 1 , , ],
     data = list(X = X, y = y, u = u, Z = Z),
     parameters = list(Sigma = Sigma[, , drop = FALSE],
                       Omega = Omega,
@@ -279,6 +281,7 @@ filter_modelB <- function(X, y, u = NULL,
            `P_t^T` = P_tT,
            `P_t-1t-2^T` = P_cov)
     } else NULL,
+    prediction_covariance = `P_t^T`[t + 1 , , ],
     data = list(X = X, y = y, u = u, Z = Z),
     parameters = list(Sigma = Sigma[, , drop = FALSE],
                       Omega = Omega,
