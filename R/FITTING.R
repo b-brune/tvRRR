@@ -346,6 +346,9 @@ tvRRR <- function(X, y, u = NULL, model = "A",
 #'
 #' @export
 
+# alpha_00 <- beta <- u <- Gamma <- Omega <- Sigma <- NULL;tol_EMstep <- tol_finish <- 1e-4; P_00 <- 1000 * diag(d*p); maxit <- 100; Omega_diagonal <- F; Gamma_rrr <- "OLS"
+
+
 fit_modelA <- function(X, y, u = NULL,
                        d,
                        beta = NULL, # model parameters
@@ -376,16 +379,10 @@ fit_modelA <- function(X, y, u = NULL,
 
   stopifnot("maxit needs to be at least 2" = { maxit > 1 })
 
-  ### Starting values for the algorithm:
+  # ---------------------------------------------------------------------------
+  # Starting values for the algorithm:
+  # ---------------------------------------------------------------------------
 
-  # alpha_00 <- beta <- u <- Gamma <- Omega <- Sigma <- NULL;tol_EMstep <- tol_finish <- 1e-4; P_00 <- 1000 * diag(d*p); maxit <- 100; Omega_diagonal <- F; Gamma_rrr <- "OLS"
-
-  # Initialization of alpha and beta: Either random or by RRR, as specified by
-  # the user
-
-  # Initialize the missing matrix as a random orthogonal matrix
-  # If only one of the matrices is given, initialize the other ones as random,
-  # if both are missing initialize them by RRR
   if ( is.null(beta) & is.null(alpha_00) ) {
 
     if (initialize == "RRR") {
@@ -427,7 +424,10 @@ fit_modelA <- function(X, y, u = NULL,
                                 if (!is.null(u)) { Gamma %*% t(u) } else { 0 } ))
   }
 
-  #### Model fitting:
+
+  #  --------------------------------------------------------------------------
+  # Model fitting: EM Algorithm
+  # ---------------------------------------------------------------------------
 
   # Perform an initial run of the filter:
   kf <- filter_modelA(y = y, X = X, u = u,
@@ -438,101 +438,99 @@ fit_modelA <- function(X, y, u = NULL,
   Q <- rep(NA, maxit)
   loglik <- rep(NA, maxit)
 
+
+  # Perform a first update -- first M-step
   update <- update_pars(kf, p = p, d = d, t = t, q = q,
-                        Omega_diagonal = Omega_diagonal, calc_Q = TRUE,
+                        Omega_diagonal = Omega_diagonal,
                         model = "A")
+
+  # Initial likelihood and Q
+  loglik[1] <- X_eval_lik(kf = kf, beta = beta, Omega = Omega, Gamma = Gamma,
+                          d = d, y = y, X = X)
   Q[1] <- update$Q
 
-  loglik[1] <- X_eval_lik(kf = kf, beta = update$beta, Omega = update$Omega,
-                          d = d, y = y, X = X)
-  iter <- 1
-
-  if (!silent) cat("Q: ", Q[iter], "Likelihood: ", loglik[iter], "\n")
-
-
   # Run the EM algorithm
+  iter <- 1
 
   while (iter < maxit) {
 
+    # Store the previous parameters:
     old_beta <- update$beta
     old_Omega <- update$Omega
-    # old_Gamma <- update$Gamma
     old_Sigma <- update$Sigma
 
+    # Run the filter with the updated parameters:
     kf <- filter_modelA(y = y, X = X, u = u, Sigma = update$Sigma,
                         Omega = update$Omega, Gamma = update$Gamma,
                         alpha_00 = kf$states$smoothed[1, ],
                         P_00 = kf$covariance$`P_t^T`[1, , ],
                         d = d, beta = update$beta)
 
+    # Update the parameters:
     update <- update_pars(kf, p = p, d = d, t = t, q = q,
-                          Omega_diagonal = Omega_diagonal, calc_Q = TRUE,
+                          Omega_diagonal = Omega_diagonal,
                           tol = tol_EMstep)
-
 
     iter <- iter + 1
 
+    # Store the likelihoods from previous iteration:
     Q[iter]      <- update$Q
-    loglik[iter] <- X_eval_lik(kf = kf, beta = update$beta, Omega = update$Omega,
+    loglik[iter] <- X_eval_lik(kf = kf, beta = old_beta,
+                               Omega = old_Omega, Gamma = old_Gamma,
                                d = d, y = y, X = X)
 
-    if (!silent) cat("Q: ", Q[iter], "Likelihood: ", loglik[iter], "\n")
-
+    # Check for problems / convergence:
     if (!is.finite(Q[iter]) | is.nan(Q[iter])) {
       cat("Q is ", Q[iter], ". Algorithm terminated.")
       break
     }
-
-
-    ## Check conditions for stopping
     if ((norm(old_Omega - update$Omega, "m") < tol_finish &
-         grassmann_dist(old_beta, update$beta, n = T) < tol_finish &
+         subsp_dist(old_beta, update$beta) < tol_finish &
          norm(old_Sigma - update$Sigma, "m") < tol_finish &
          abs((loglik[iter] - loglik[iter - 1]) / loglik[iter - 1]) < tol_finish) |
         loglik[iter] < loglik[iter - 1]
     ) {
 
-      if (!silent) {
-        message(paste0("Algorithm stopped after ", iter,
-                       " iterations. \n Relative likelihood difference: ",
-                       round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
-                       "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
-                       "\n Difference in beta: ",  round(grassmann_dist(old_beta, update$beta, n = TRUE), 6),
-                       "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
-        )
-      }
-
       break
     }
+
   }
 
   # One last run of the filter with the final parameter estimates:
-
   kf <- filter_modelA(y = y, X = X, u = u, Sigma = update$Sigma,
                       Gamma = update$Gamma,
                       Omega = update$Omega, alpha_00 = kf$states$smoothed[1, ],
                       P_00 = kf$covariance$`P_t^T`[1, , ],
                       d = d, beta = update$beta,
-                      return_covariances = T)
+                      return_covariances = TRUE)
 
+  # Evaluate the likelihoods:
   Q <- c(Q[1:iter],
          X_calc_Q(kf = kf, p = p, d = d, q = q, t = t, return_C = F, model = "A"))
 
-  loglik <- c(loglik[1:iter], X_eval_lik(kf = kf, Omega = kf$parameters$Omega,
-                                         beta = kf$parameters$beta,
-                                         d = d, y = y, X = X))
+  loglik <- c(loglik[1:iter],
+              X_eval_lik(kf = kf, Omega = kf$parameters$Omega,
+                         beta = kf$parameters$beta, Gamma = kf$parameters$Gamma,
+                         d = d, y = y, X = X))
 
   if (!return_covariances) kf$covariances <- NULL
 
+  iter <- iter + 1
+
+  conv_message <- paste0("Algorithm stopped after ", iter,
+                         " iterations. \n Relative likelihood difference: ",
+                         round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
+                         "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
+                         "\n Difference in beta: ",  round(subsp_dist(old_beta, update$beta), 6),
+                         "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
+
+
+  if (!silent) {
+    cat(conv_message)
+  }
+
   return(c(kf, iter = iter, likelihoods = list(Q = Q, loglik = loglik),
-         convergence_information = list(
-           paste0("Algorithm terminated after ", iter,
-                  " iterations. \n Relative likelihood difference: ",
-                  round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
-                  "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
-                  "\n Difference in beta: ",  round(grassmann_dist(old_beta, update$beta, n = TRUE), 6),
-                  "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
-         )))
+         convergence_information = conv_message))
 }
 
 
@@ -614,7 +612,9 @@ fit_modelB <- function(X, y, u = NULL, d,
 
   stopifnot("maxit needs to be at least 2" = { maxit > 1 })
 
+  # ---------------------------------------------------------------------------
   # Starting values for the parameters:
+  # ---------------------------------------------------------------------------
 
   if ( is.null(beta_00) & is.null(alpha) ) {
 
@@ -659,9 +659,11 @@ fit_modelB <- function(X, y, u = NULL, d,
                                 if (!is.null(u)) { Gamma %*% t(u) } else { 0 }))
   }
 
+  # ---------------------------------------------------------------------------
+  # Model fitting: Run the EM-algorithm
+  # ---------------------------------------------------------------------------
 
-  # Model fitting:
-
+  # Initial run of the filter
   kf <- filter_modelB(X = X, y = y, u = u,
                       beta_00 = beta_00,
                       alpha = alpha, Gamma = Gamma,
@@ -673,15 +675,18 @@ fit_modelB <- function(X, y, u = NULL, d,
 
   update <- update_pars(kf, p = p, d = d, t = t, q = q,
                         Omega_diagonal = Omega_diagonal,
-                        calc_Q = TRUE, model = "B")
-  Q[1] <- update$Q
-  loglik[1] <- X_eval_lik(kf = kf, Omega = update$Omega, alpha = update$alpha,
+                        model = "B")
+
+  # Likelihoods at start of algorithm:
+  loglik[1] <- X_eval_lik(kf = kf, Omega = Omega, alpha = alpha,
                           d = d, X = X, y = y)
+  Q[1] <- update$Q
+
+  # Run the EM-algorithm:
   iter <- 1
 
   while (iter < maxit) {
 
-    # print(Q_old)
 
     old_alpha <- update$alpha; old_Omega <- update$Omega; old_Gamma <- update$Gamma
     old_Sigma <- update$Sigma
@@ -691,65 +696,70 @@ fit_modelB <- function(X, y, u = NULL, d,
                         Omega = update$Omega, beta_00 = kf$states$smoothed[1, ],
                         P_00 = kf$covariance$`P_t^T`[1, , ],
                         d = d, alpha = update$alpha)
+
     # M-step:
     update <- update_pars(kf, p = p, d = d, t = t, q = q,
-                          Omega_diagonal = Omega_diagonal, calc_Q = TRUE,
+                          Omega_diagonal = Omega_diagonal, # calc_Q = TRUE,
                           tol = tol_EMstep, model = "B")
 
     iter <- iter + 1
 
     Q[iter] <- update$Q
-    loglik[iter] <- X_eval_lik(kf = kf, alpha = update$alpha, Omega = update$Omega,
+    loglik[iter] <- X_eval_lik(kf = kf, alpha = old_alpha, Omega = old_Omega,
+                               Gamma = old_Gamma,
                                d = d, y = y, X = X)
 
-    if (!silent) cat("Q: ", Q[iter], "Likelihood: ", loglik[iter], "\n")
-
+    # Check for convergence / errors:
     if (!is.finite(Q[iter]) | is.nan(Q[iter])) {
       cat("Q is ", Q[iter], ". Algorithm terminated.")
       break
     }
 
-    ## Check conditions for stopping
+    # Check conditions for stopping
     if ((norm(old_Omega - update$Omega, "m") < tol_finish &
-         grassmann_dist(old_alpha, update$alpha, n = T) < tol_finish &
+         subsp_dist(old_alpha, update$alpha) < tol_finish &
          norm(old_Sigma - update$Sigma, "m") < tol_finish &
          abs((loglik[iter] - loglik[iter - 1]) / loglik[iter - 1]) < tol_finish) |
         loglik[iter] < loglik[iter - 1]
     ) {
 
-      if (!silent) {
-        message(paste0("Algorithm terminated after ", iter,
-                       " iterations. \n Relative likelihood difference: ",
-                       round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
-                       "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
-                       "\n Difference in beta: ",  round(grassmann_dist(old_alpha, update$alpha, n = TRUE), 6),
-                       "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
-        )
-      }
-
       break
     }
+
   }
 
+  # One last run of the filter with the final set of parameters:
   kf <- filter_modelB(y = y, X = X, u = u, Gamma = update$Gamma, Sigma = update$Sigma,
                       Omega = update$Omega, beta_00 = kf$states$smoothed[1, ],
                       P_00 = kf$covariance$`P_t^T`[1, , ],
                       d = d, alpha = update$alpha,
-                      return_covariances = return_covariances)
+                      return_covariances = TRUE)
+
+  # Evaluate the likelihoods for this set of parameters:
+  Q <- c(Q[1:iter], X_calc_Q(kf = kf, p = p, d = d, q = q, t = t, return_C = F, model = "B"))
+  loglik <- c(loglik[1:iter], X_eval_lik(kf = kf, Omega = kf$parameters$Omega,
+                                        alpha = kf$parameters$alpha, Gamma = kf$parameters$Gamma,
+                                        d = d, y = y, X = X))
+
+  iter <- iter + 1
+
+  conv_message <-  paste0("Algorithm terminated after ", iter,
+                          " iterations. \n Relative likelihood difference: ",
+                          round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
+                          "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
+                          "\n Difference in beta: ",  round(subsp_dist(old_alpha, update$alpha), 6),
+                          "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
 
 
-  Q <- Q[1:iter]
-  loglik <- loglik[1:iter]
+  if (!silent) {
+    cat(conv_message)
+  }
+
+
+  if (!return_covariances) kf$covariances <- NULL
 
   return(c(kf, iter = iter, likelihoods = list(Q = Q, loglik = loglik),
-           convergence_information = list(
-             paste0("Algorithm terminated after ", iter,
-                    " iterations. \n Relative likelihood difference: ",
-                    round((loglik[iter] - loglik[iter - 1]) / abs(loglik[iter - 1]), 6),
-                    "\n Difference in Omega: ", round(norm(old_Omega - update$Omega, "m"), 6),
-                    "\n Difference in beta: ",  round(grassmann_dist(old_alpha, update$alpha, n = TRUE), 6),
-                    "\n Difference in Sigma: ", round(norm(old_Sigma - update$Sigma, "m"), 6))
-           )))
+           convergence_information = conv_message))
 }
 
 
