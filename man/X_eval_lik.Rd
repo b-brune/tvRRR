@@ -5,7 +5,7 @@
 \title{HEPL 3.1:
 Calculate the true data likelihood based on the latent states}
 \usage{
-X_eval_lik(kf, Omega, beta = NULL, alpha = NULL, d, y, X)
+X_eval_lik(kf, Omega, beta = NULL, alpha = NULL, Gamma = NULL, d, y, X)
 }
 \description{
 HEPL 3.1:

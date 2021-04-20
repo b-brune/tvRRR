@@ -13,12 +13,11 @@ update_pars(
   tol = 0.001,
   maxit = 50,
   Omega_diagonal = FALSE,
-  calc_Q = TRUE,
   model = "A"
 )
 }
 \arguments{
-\item{kf}{a kalman filter object, output from my_KFS function}
+\item{kf}{a Kalman filter object, output from eval_tvRRR() / filter_modelA() / filter_modelB() function}
 
 \item{p}{dimension of the target}
 
@@ -31,8 +30,6 @@ update_pars(
 \item{tol}{tolerance for convergence in iterative parameter updating}
 
 \item{Omega_diagonal}{logical, indicates whether Omega is assumed to be diagonal}
-
-\item{calc_Q}{should the expected likelihood of the current parameter set be evaluated?}
 }
 \value{
 List of updated parameters:
@@ -41,7 +38,7 @@ List of updated parameters:
 \item{alpha}{(when fitting model B)}
 \item{Sigma}{}
 \item{Gamma}{(when considering external variables)}
-\item{Q}{if calc_Q = TRUE, value of the expected likelihood Q(Theta|Theta^j), otherwise NULL}
+\item{Q}{value of the expected likelihood Q(Theta|Theta^j)}
 }
 \description{
 Function that updates the parameters from the current output of the KF-function

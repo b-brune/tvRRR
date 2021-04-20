@@ -199,8 +199,8 @@ predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE, ...) {
 ##
 ## ############################################################################
 
-#' @export
-BIC.tvRRR <- function(kf, d, model = "A", ...) {
+#' @keywords internal
+BIC_tvRRR <- function(kf, d, model = "A", ...) {
 
   t <- nrow(kf$data$X)
 
@@ -213,8 +213,8 @@ BIC.tvRRR <- function(kf, d, model = "A", ...) {
   -2 * kf$likelihoods.loglik[kf$iter] + K * log(t)
 }
 
-#' @export
-MSFE.tvRRR <- function(kf, newdata = NULL, model = "A") {
+#' @keywords internal
+MSFE_tvRRR <- function(kf, newdata = NULL, model = "A") {
   yhat <- predict(kf, newdata = newdata)
   mean((newdata$y - yhat)^2)
 }

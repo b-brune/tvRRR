@@ -183,7 +183,7 @@ X_calc_Q <- function(kf, p, d, q, t, return_C = FALSE, model = "A") {
 #' HEPL 3.1:
 #' Calculate the true data likelihood based on the latent states
 #' @keywords internal
-#'
+
 X_eval_lik <- function(kf, Omega, beta = NULL, alpha = NULL, Gamma = NULL, d, y, X) {
 
   #s <- kf$states$smoothed
@@ -306,7 +306,7 @@ X_update_Gamma <- function(kf, Z) {
 #'  \item{alpha}{(when fitting model B)}
 #'  \item{Sigma}{}
 #'  \item{Gamma}{(when considering external variables)}
-#'  \item{Q}{if calc_Q = TRUE, value of the expected likelihood Q(Theta|Theta^j), otherwise NULL}
+#'  \item{Q}{value of the expected likelihood Q(Theta|Theta^j)}
 #'
 #' @keywords internal
 
@@ -402,7 +402,7 @@ update_pars <- function(kf, p, d, t, q, # kf-Object and the dimensions of the mo
 
         Gamma_n <- X_update_Gamma(kf = kf, Z = Z)
 
-        if (grassmann_dist(alpha_n, alpha, normalized = T) < tol |
+        if (subsp_dist(alpha_n, alpha) < tol |
             norm(Gamma_n - Gamma, 'm') < tol) break
       }
     } else {

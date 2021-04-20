@@ -245,7 +245,7 @@ tvRRR <- function(X, y, u = NULL, model = "A",
                                    model = model, Sigma = Sigma_init * diag(d_try), ...)
       crit[d_try] <- {
         if (criterion == "BIC") {
-          BIC.tvRRR(kf = models[[d_try]], d = d_try, model = model)
+          BIC_tvRRR(kf = models[[d_try]], d = d_try, model = model)
         }
       }
     }
@@ -526,7 +526,7 @@ fit_modelA <- function(X, y, u = NULL,
 
 
   if (!silent) {
-    cat(conv_message)
+    message(conv_message)
   }
 
   return(c(kf, iter = iter, likelihoods = list(Q = Q, loglik = loglik),
@@ -752,7 +752,7 @@ fit_modelB <- function(X, y, u = NULL, d,
 
 
   if (!silent) {
-    cat(conv_message)
+    message(conv_message)
   }
 
 
