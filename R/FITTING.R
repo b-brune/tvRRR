@@ -201,7 +201,7 @@ fit_tvRRR <- function(X, y, u = NULL, d, model = "A",
 
 tvRRR <- function(X, y, u = NULL, model = "A",
                   d, select_rank = TRUE, d_max,
-                  criterion = c("AIC", "BIC"),
+                  criterion = "BIC",
                   correctAIC = TRUE, Sigma_init = 0.1, ...) {
 
   # p <- ncol(y)
@@ -220,6 +220,10 @@ tvRRR <- function(X, y, u = NULL, model = "A",
 
 
   else if (select_rank) {
+
+    if (criterion != "BIC") stop("The model selection criterion you chose is not
+                                 yet implemented.")
+
     if (missing(d_max) & !missing(d)) d_max <- d
     if (missing(d_max) & missing(d)) d_max <- q
 
@@ -240,9 +244,7 @@ tvRRR <- function(X, y, u = NULL, model = "A",
       models[[d_try]] <- fit_tvRRR(X = X, y = y, u = u, d = d_try,
                                    model = model, Sigma = Sigma_init * diag(d_try), ...)
       crit[d_try] <- {
-        if (criterion == "AIC") {
-          AIC.tvRRR(kf = models[[d_try]], d = d_try, model = model, correct = TRUE)
-        } else if (criterion == "BIC") {
+        if (criterion == "BIC") {
           BIC.tvRRR(kf = models[[d_try]], d = d_try, model = model)
         }
       }
@@ -252,9 +254,7 @@ tvRRR <- function(X, y, u = NULL, model = "A",
 
     fit <- models[[which.min(crit)]]
 
-    if (criterion == "AIC") {
-      fit$AIC <- min(crit)
-    } else if (criterion == "BIC") {
+    if (criterion == "BIC") {
       fit$BIC <- min(crit)
     }
 

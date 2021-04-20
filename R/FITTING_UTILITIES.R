@@ -78,19 +78,22 @@ print.tvRRR <- function(kf) {
 #' Predict method for tvRRR object
 #' @param kf object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function
 #' @param newdata can be specified differently with differing behavior: \itemize{
-#'                \item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called
+#'                \item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called and
+#'                fitted values for the initial data are calculated
 #'                \item a named list of length 1 or 2 containing predictors X and u for predictions
 #'                      using the last state fitted
 #'                \item a named list of length 2 or 3 containing targets y, predictors X and, optionally
-#'                      additional predictors u
+#'                      additional predictors u; here the estimated states are updated in every step
+#'                      of the algorithm
 #'                }
+#' @param silent specifies whether a message should be printed regarding the type of prediction
 #'
 #' @returns The predicted target variables in the specified setup (as a matrix)
 #'
 #' @export
 
 
-predict.tvRRR <- function(kf, newdata = NULL) {
+predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE) {
 
   if (is.null(newdata)) return(fitted.tvRRR(kf))
 
@@ -121,7 +124,7 @@ predict.tvRRR <- function(kf, newdata = NULL) {
                     if (!is.null(u)) kf$parameters$Gamma %*% t(u) else 0
         )
       }
-      message("Prediction without updating.")
+      if (!silent) message("Prediction without updating.")
 
       return(yhat)
 
@@ -173,7 +176,7 @@ predict.tvRRR <- function(kf, newdata = NULL) {
         }))
       }
 
-      message("Prediction with subsequent state updates, one-step-ahead.")
+      if (!silent) message("Prediction with subsequent state updates, one-step-ahead.")
 
       return(yhat)
     }
