@@ -46,7 +46,7 @@
 #'     \item `P_t-1t-2^T` smoothed lag-1 covariances -- (t, p*d, p*d),
 #'     }
 #'     else \code{NULL}}
-#' \item{prediction_covariance}{contains `P_t^T`[T, , ] which is necessary for one-step
+#' \item{prediction_covariance}{contains `P_t^T[t+1, , ]` which is necessary for one-step
 #'                              ahead prediction of \code{tvRRR} object.}
 #' \item{data}{the data handed over to the algorithms, a named list with elements
 #' \itemize{

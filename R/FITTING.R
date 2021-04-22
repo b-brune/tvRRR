@@ -86,7 +86,8 @@
 #' `Omega_diagonal` logical, indicates whether Omega is assumed to be a
 #'                  diagonal matrix (advisable if p is large)
 #'
-#' @return#' An object of class \code{tvRRR}, that is a named list of lists with elements
+#' @return
+#'  An object of class \code{tvRRR}, that is a named list of lists with elements
 #' \describe{
 #'  \item{states}{the filtered states, a named list with elements
 #'  \itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
@@ -102,7 +103,7 @@
 #'     \item `P_t-1t-2^T` smoothed lag-1 covariances -- (t, p*d, p*d),
 #'     }
 #'     else \code{NULL}}
-#' \item{prediction_covariance}{contains `P_t^T`[T, , ] which is necessary for one-step
+#' \item{prediction_covariance}{contains `P_t^T[t+1, , ]` which is necessary for one-step
 #'                              ahead prediction of \code{tvRRR} object.}
 #' \item{data}{the data handed over to the algorithms, a named list with elements
 #' \itemize{
@@ -132,6 +133,8 @@
 #' }
 #'
 #' @seealso \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}
+#'
+#' @example
 #'
 #' @export
 
@@ -411,9 +414,9 @@ fit_modelA <- function(X, y, u = NULL,
 
   if (is.null(Omega)) {
     if (Omega_diagonal) {
-      Omega <- diag(diag(cov(y - t(tcrossprod(matrix(alpha_00, p, d), beta) %*% t(X) +
+      Omega <- diag(diag(stats::cov(y - t(tcrossprod(matrix(alpha_00, p, d), beta) %*% t(X) +
                                      if (!is.null(u)) { Gamma %*% t(u) } else { 0 } ))))
-    } else Omega <- cov(y - t(tcrossprod(matrix(alpha_00, p, d), beta) %*% t(X) +
+    } else Omega <- stats::cov(y - t(tcrossprod(matrix(alpha_00, p, d), beta) %*% t(X) +
                                 if (!is.null(u)) { Gamma %*% t(u) } else { 0 } ))
   }
 
@@ -647,9 +650,9 @@ fit_modelB <- function(X, y, u = NULL, d,
 
   if (is.null(Omega)) {
     if (Omega_diagonal) {
-      Omega <- diag(diag(cov(y - t(alpha %*% beta_00 %*% t(X) +
+      Omega <- diag(diag(stats::cov(y - t(alpha %*% beta_00 %*% t(X) +
                                      if (!is.null(u)) { Gamma %*% t(u) } else { 0 } ))))
-    } else Omega <- cov(y - t(alpha %*% beta_00 %*% t(X) +
+    } else Omega <- stats::cov(y - t(alpha %*% beta_00 %*% t(X) +
                                 if (!is.null(u)) { Gamma %*% t(u) } else { 0 }))
   }
 

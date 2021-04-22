@@ -3,7 +3,7 @@
 ##
 
 #' GENERALIZED MATRIX POWER FUNCTION FOR SYMMETRIC MATRICES (by Daniel Kapla)
-#' @export
+#' @keywords internal
 
 matpow <- function(A, pow, symmetric = FALSE, tol = 1e-7) {
   if (nrow(A) != ncol(A)) {
@@ -64,7 +64,7 @@ matpow <- function(A, pow, symmetric = FALSE, tol = 1e-7) {
 #' @seealso C.F. Van Loan / Journal of Computational and Applied Mathematics
 #'          123 (2000) 85-100 (pp. 93-95)
 #'
-#' @export
+#' @keywords internal
 approx.kronecker <- function(C, dimA, dimB) {
 
   dim(C) <- c(dimB[1L], dimA[1L], dimB[2L], dimA[2L])
@@ -80,7 +80,7 @@ approx.kronecker <- function(C, dimA, dimB) {
 }
 
 #' Check whether a matrix is symmetric
-#' @export
+#' @keywords internal
 is.symmetric <- function(A) {
   stopifnot(is.matrix(A),
             dim(A)[1] == dim(A)[2])
@@ -95,11 +95,11 @@ is.symmetric <- function(A) {
 ##
 
 #' POLAR PROJECTION OF A MATRIX ONTO ITS ORTHOGONAL PART
-#' @export
+#' @keywords internal
 polar_proj <- function(X) return(X %*% matpow(crossprod(X), -0.5))
 
 #' draw random matrix from Stiefel manifold
-#' @export
+#' @keywords internal
 rstiefel <- function(p, d) {
   if (d > p) stop("The matrix needs to have more rows than columns.")
 
@@ -107,7 +107,7 @@ rstiefel <- function(p, d) {
 }
 
 #' #' ORTHOGONAL PROJECTION ONTO SPAN(A)
-#'
+#' @keywords internal
 orth_proj <- function(A) {
   tcrossprod(A %*% matpow(crossprod(A), -1), A)
 }
@@ -120,7 +120,7 @@ orth_proj <- function(A) {
 ##
 
 #' NORMALIZED SUBSPACE DISTANCE (FROBENIUS OF PROJECTION DIFFERENCE)
-#' @export
+#' @keywords internal
 subsp_dist <- function(X, Y) {
   #  if (all.equal(dim(X) != dim(Y)) stop("X and Y need to have the same dimensions.")
   if (is.vector(X)) X <- matrix(X, length(X), 1)
@@ -129,17 +129,8 @@ subsp_dist <- function(X, Y) {
   return(norm(orth_proj(X) - orth_proj(Y), 'F') / sqrt(2 * ncol(X)))
 }
 
-#' YANGS DISTANCE
-#' @export
-yang_dist <- function(X, Y) {
-  if (is.vector(X)) X <- matrix(X, length(X), 1)
-  if (is.vector(Y)) Y <- matrix(Y, length(Y), 1)
-
-  return(norm(X - Y, 'F') / sqrt(4 * ncol(X)))
-}
-
 #' UNNORMALIZED GRASSMANN DISTANCE (BASED ON PRINCIPAL ANGLES)
-#' @export
+#' @keywords internal
 grassmann_dist <- function(A, B, tol = max(dim(A))* sqrt(.Machine$double.eps),
                            normalized = FALSE) {
 

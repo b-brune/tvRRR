@@ -96,7 +96,7 @@ dataset <- function(type, p, d, q, t, X, forecast, model = "A", ...) {
 
 
 #' Dataset that has a deterministic transition
-# #' @keywords internal
+#' @keywords internal
 
 make_dataset_deterministic <- function(X, alpha_0 = NULL, alpha_1 = NULL,
                                        shift = 1, beta_0 = NULL, beta_1 = NULL,
@@ -283,7 +283,7 @@ make_VARdataset_determ <- function(t = 100,
 
 
 #' VAR-dataset that contains a break
-# #' @keywords internal
+#' @keywords internal
 
 make_VARdataset_break <- function(t = 100,
                                   alpha_0 = NULL, alpha_1 = NULL, beta_0 = NULL,
@@ -409,7 +409,7 @@ make_VARdataset_break <- function(t = 100,
 
 
 #' Dataset that contains a structural break
-# #' @keywords internal
+#' @keywords internal
 make_dataset_break <- function(X, alpha_0 = NULL, alpha_1 = NULL, shift = 1,
                                beta_0 = NULL, beta_1 = NULL, Omega = NULL,
                                p, d, model = "A", forecast = 0,
@@ -515,7 +515,7 @@ make_dataset_break <- function(X, alpha_0 = NULL, alpha_1 = NULL, shift = 1,
 #' Dataset where the time-varying parameter matrices perform a random walk in
 #' euclidean space where Cov(vec(alpha_t)) = kronecker(Sigma, Delta), Sigma
 #' is dxd (column covariance) and Delta is pxp (row covariance)
-# #' @keywords internal
+#' @keywords internal
 
 make_dataset_rw <- function(X, alpha_0 = NULL, beta_0 = NULL, Omega = NULL,
                             p, d, q = ncol(X), Sigma = NULL,
@@ -614,7 +614,7 @@ make_dataset_rw <- function(X, alpha_0 = NULL, beta_0 = NULL, Omega = NULL,
 
 
 #' Matrices are actually fixed
-# #' @keywords internal
+#' @keywords internal
 make_dataset_fixed <- function(X, alpha = NULL, beta = NULL, Omega = NULL,
                                p, d, model = "A", forecast = 0) {
 
