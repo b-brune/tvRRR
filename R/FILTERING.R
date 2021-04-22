@@ -1,26 +1,85 @@
-#' Filtering:
+#' Filtering for the tvRRR model
 #'
-#' Run the Kalman filter for a fixed set of parameters and prespecified model
+#' Run the Kalman filter for a fixed set of parameters and prespecified model A or B as
+#' defined in Brune, Bura and Scherrer (2021+).
 #'
-#' @param X the predictors
-#' @param y the target variable
-#' @param u additional predictors that come in as full rank
-#' @param model specifies whether we're filtering in model "A" or model "B"
-#' @param beta starting value for the algorithm, or time-constant parameter matrix (q x d)
-#' @param alpha starting value for the algorithm, or the time-constant parameter matrix (p x d)
+#' @param y the target variable (t x p matrix)
+#' @param X the predictors (t x q matrix)
+#' @param u (optional) additional predictors that do not necessarily vary in
+#'          time (t x k matrix)
+#' @param model specifies the model to be fitted, either \code{"A"} or \code{"B"}
+#' @param beta starting value for the algorithm, or time-constant parameter matrix (q x d),
+#' for model A this corresponds to the time-constant parameter \code{beta},
+#' for model B it corresponds to the initial state \code{beta_00}
+#' @param alpha starting value for the algorithm, or the time-constant parameter matrix (p x d),
+#' for model A this corresponds to \code{alpha_00}, for model B it corresponds to the time-constant
+#' parameter \code{alpha}
 #' @param Gamma (optional), the time constant full rank (t x k) matrix
-#' @param P_00 starting covariance for the algorithm (p*d x p*d matrix for A, (q*d x q*d) matrix for B)
+#' @param P_00 starting covariance for the algorithm (p*d x p*d matrix)
 #' @param Sigma column covariance of the states alpha_t (symmetric d x d matrix)
 #' @param Omega error covariance in the measurement equation (symmetric p x p matrix)
 #' @param d latent dimension (min. 1, no default)
+#' @param return_covariances logical, indicates whether the filtered and smoothed covariances should be returned,
+#'        defaults to \code{FALSE}.
 #'
-#' @returns An object of class \code{tvRRR} (LINK TO DOCUMENTATION OF tvRRR CLASS ->
-#' DAS IST EIGENTLICH GELOGEN, mal gucken wie wir das lösen können)
+#'
+#' @details
+#'  \code{eval_tvRRR()} calls \code{filter_modelA()} or \code{filter_modelB()} respectively.
+#'  \code{filter_modelB()} processes the transposed states, i.e. when directly using this function
+#'  make sure you hand over the transposed matrix to \code{beta_00}.
+#'
+#'
+#' @returns An object of class \code{tvRRR}, that is
+#' a named list of lists with elements
+#' \describe{
+#'  \item{states}{the filtered states, a named list with elements
+#'  \itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
+#'           \item smoothed (the smoothed states) -- one state matrix per row (t + 1 x p * d)
+#'           \item one-step-ahead (one-step ahead predictions of the states -- one state matrix per row (t + 1 x p * d))
+#'           }
+#'           }
+#'  \item{covariances}{the filtered and smoothed covariances and lag-1 covariances,
+#'  if \code{return_covariances = TRUE}, a named list with elements
+#'  \itemize{\item `P_t^t` filtered covariances -- array of dimensions (t+1, p*d, p*d)
+#'     \item `P_t^t-1`predicted covariances -- (t, p*d, p*d)
+#'     \item `P_t^T` smoothed covariances -- (t+1, p*d, p*d)
+#'     \item `P_t-1t-2^T` smoothed lag-1 covariances -- (t, p*d, p*d),
+#'     }
+#'     else \code{NULL}}
+#' \item{prediction_covariance}{contains `P_t^T`[T, , ] which is necessary for one-step
+#'                              ahead prediction of \code{tvRRR} object.}
+#' \item{data}{the data handed over to the algorithms, a named list with elements
+#' \itemize{
+#'     \item `X` predictors -- (t, q)
+#'     \item `y` responses -- (t, p)
+#'     \item `u` additional predictors -- (t, k)
+#'     \item `Z` transition matrices (X_t'beta (x) I_p) -- (t, p, p*d)
+#'     }
+#'     }
+#' \item{parameters}{the parameters used for filtering:
+#' \itemize{
+#'     \item Sigma -- (d, d)
+#'     \item Omega -- (p, p)
+#'     \item beta -- (q, d) (for model A)
+#'     \item alpha -- (p, d) (for model B)
+#' }
+#' }}
+#'
 #'
 #' @export
 
 
-eval_tvRRR <- function(X, y, u = NULL, d, model = "A", alpha, beta, ...) {
+eval_tvRRR <- function(X,
+                       y,
+                       u = NULL,
+                       d,
+                       model = "A",
+                       alpha,
+                       beta,
+                       Omega,
+                       Sigma,
+                       P_00,
+                       ...) {
 
   if (model == "A") kf <- filter_modelA(X = X, y = y, u = u, alpha_00 = alpha, beta = beta, d = d, ...)
 
@@ -39,46 +98,15 @@ eval_tvRRR <- function(X, y, u = NULL, d, model = "A", alpha, beta, ...) {
 ## ############################################################################
 
 
-#' Function that runs the Kalman filter
+#' Function that runs the Kalman filter for model A
 #'
-#' Input:
-#' @param y the target variable (t x p matrix)
-#' @param X the predictors (t x q matrix)
-#' @param u (optional) additional predictors that do not necessarily vary in
-#'          time (t x k matrix)
-#' @param beta the time-constant part of the matrix (either NULL or a starting value)
-#' @param alpha_00 starting value for the algorithm (either NULL or a starting value)
-#' @param gamma (optional), the time constant full rank (t x k) matrix
-#' @param P_00 starting covariance for the algorithm (p*d x p*d matrix)
-#' @param Sigma column covariance of the states alpha_t (symmetric d x d matrix)
-#' @param Omega error covariance in the measurement equation (symmetric p x p matrix)
-#' @param d latent dimension (min. 1, no default)
-#'
-#' Output:
-#' A named list of lists with elements
-#' - states: filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
-#'           smoothed (the smoothed states) -- one state matrix per row (t + 1 x p * d)
-#' - covariances: the filtered and smoothed covariances and lag-1 covariances
-#'     `P_t^t` filtered covariances -- array of dimensions (t+1, p*d, p*d)
-#'     `P_t^t-1`predicted covariances -- (t, p*d, p*d)
-#'     `P_t^T` smoothed covariances -- (t+1, p*d, p*d)
-#'     `P_t-1t-2^T` smoothed lag-1 covariances -- (t, p*d, p*d)
-#' - data: the data handed over to the algorithms
-#'     `X` predictors -- (t, q)
-#'     `y` responses -- (t, p)
-#'     `u` additional predictors -- (t, k)
-#'     `Z` transition matrices (X_t'beta (x) I_p) -- (t, p, p*d)
-#' - parameters used during filtering: Sigma (d, d), Omega (p, p), beta (q, d)
-#'
-#' Symmetry of the matrices is enforced using the hint in
-#' https://math.stackexchange.com/questions/2335831/covariance-matrix-p-for-an-extended-kalman-filter-not-symmetric
+#' @rdname eval_tvRRR
 #' @export
 
 filter_modelA <- function(y, X, u = NULL,
                           beta, alpha_00, Gamma = NULL,
                           P_00, Sigma, Omega, d,
-                          return_covariances = TRUE,
-                          Gamma_rrr = "identity"){
+                          return_covariances = TRUE) {
 
   t <- nrow(y)
   p <- ncol(y)
@@ -185,7 +213,8 @@ filter_modelA <- function(y, X, u = NULL,
 
 #' Function that runs the Kalman filter for model (B)
 #'
-#' It processes beta', not beta!!
+#' @rdname eval_tvRRR
+#'
 #' @export
 filter_modelB <- function(X, y, u = NULL,
                           P_00, Sigma, Omega,
