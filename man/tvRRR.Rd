@@ -2,7 +2,8 @@
 % Please edit documentation in R/FITTING.R
 \name{tvRRR}
 \alias{tvRRR}
-\title{Fit the tvRRR model (Brune et al., 2021+) to an observed dataset.}
+\alias{fit_tvRRR}
+\title{Fit the tvRRR model}
 \usage{
 tvRRR(
   X,
@@ -12,11 +13,11 @@ tvRRR(
   d,
   select_rank = TRUE,
   d_max,
-  criterion = "BIC",
-  correctAIC = TRUE,
   Sigma_init = 0.1,
   ...
 )
+
+fit_tvRRR(X, y, u = NULL, d, model = "A", ...)
 }
 \arguments{
 \item{X}{predictors (t x q-dimensional numeric matrix)}
@@ -25,66 +26,130 @@ tvRRR(
 
 \item{u}{additional predictors (t x k-dimensional numeric matrix)}
 
-\item{d}{latent dimension}
+\item{model}{determines the model to be fit, either \code{"A"} or \code{"B"}.}
 
 \item{d_max}{maximum latent dimension, needs to be an integer and can at most be min(p, q)}
 
-\item{criterion}{string specifying the desired criterion, in \code{c("AIC", "BIC")},
-defaults to AIC}
+\item{Sigma_init}{optional, modifies the initial state covariance defined as \code{Sigma_init * diag(d)}}
 
-\item{correctAIC}{logical, if criterion is AIC, determines the need to correct for
-small sample sizes, defaults to TRUE}
-
-\item{...}{additional parameters that are handed over to \code{fit_modelA()} or
-\code{fit_modelB()} respectively (starting values, convergence conditions, etc.)}
+\item{...}{additional parameters such as starting values handed over to the EM-algorithms
+for models A and B, see details.}
 }
 \value{
-An object of class \code{tvRRR}, that is a named list of lists with elements
-\item{states}{ The estimated states (i.e. coefficient matrices)
+#' An object of class \code{tvRRR}, that is a named list of lists with elements
+\describe{
+\item{states}{the filtered states, a named list with elements
+\itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
+\item smoothed (the smoothed states) -- one state matrix per row (t + 1 x p * d)
+\item one-step-ahead (one-step ahead predictions of the states -- one state matrix per row (t + 1 x p * d))
+}
+}
+\item{covariances}{the filtered and smoothed covariances and lag-1 covariances,
+if \code{return_covariances = TRUE}, a named list with elements
+\itemize{\item \code{P_t^t} filtered covariances -- array of dimensions (t+1, p\emph{d, p}d)
+\item \code{P_t^t-1}predicted covariances -- (t, p\emph{d, p}d)
+\item \code{P_t^T} smoothed covariances -- (t+1, p\emph{d, p}d)
+\item \verb{P_t-1t-2^T} smoothed lag-1 covariances -- (t, p\emph{d, p}d),
+}
+else \code{NULL}}
+\item{prediction_covariance}{contains \code{P_t^T}\link{T, , } which is necessary for one-step
+ahead prediction of \code{tvRRR} object.}
+\item{data}{the data handed over to the algorithms, a named list with elements
 \itemize{
-\item filtered (the filtered states)
-\item smoothed (the smoothed states)
+\item \code{X} predictors -- (t, q)
+\item \code{y} responses -- (t, p)
+\item \code{u} additional predictors -- (t, k)
+\item \code{Z} transition matrices (X_t'beta (x) I_p) -- (t, p, p*d)
 }
 }
-\item{covariances}{The filtered and smoothed covariances and lag-1 covariances
-(if \code{return_covariances = TRUE})
+\item{parameters}{the parameters used for filtering:
 \itemize{
-\item \code{P_t^t} filtered covariances
-\item \code{P_t^t-1} predicted covariances
-\item \code{P_t^T} smoothed covariances
-\item \code{P_t-1t-2^T} smoothed lag-1 covariances
-}
-}
-\item{data}{the data handed over to the algorithms
-\itemize{
-\item \code{X} predictors
-\item \code{y} responses
-\item \code{u} additional predictors
-\item \code{Z} transition matrices (X_t'beta (x) I_p)
-}
-}
-\item{parameters}{The parameters that have been fitted during the algorithm,
-that is\itemize{
-\item \code{Sigma} the column covariance of the states
-\item \code{Omega} the error covariance
-\item \code{beta} (for model A)
-\item \code{alpha} (for model B)
-}
-}
+\item Sigma -- (d, d)
+\item Omega -- (p, p)
+\item beta -- (q, d) (for model A)
+\item alpha -- (p, d) (for model B)
+}}
 \item{likelihoods}{list containing information on the data likelihood during
-the fitting procedure, i.e. \itemize{
+the fitting procedure, i.e.
+\itemize{
 \item \code{Q} the negative expected log likelihood obtained from EM
 \item \code{logLik} actual data log Likelihood for each iteration
 }
 }
 \item{convergence_information}{Message containing parameter stages at convergence}
-\item{AIC (or BIC)}{Value of the information criterion for the selected model}
+\item{BIC}{Value of the information criterion for the selected model}
+}
 }
 \description{
-Rank selection
-is performed automatically based on either AIC or BIC. The model with the lowest
-AIC / BIC is selected. We use a version of AIC that is corrected for small
-sample sizes (AIC_c).
+The function fits the tvRRR model to an observed dataset using the EM-algorithm.
+Rank selection is performed automatically based on the BIC criterion.
+The model with the lowest BIC is selected.
+}
+\details{
+The \code{tvRRR()} function fits the tvRRR models of class A and B.
+The model
+is a reduced rank regression model, where the coefficient matrix can be decomposed
+in two ways: \eqn{C_t = \alpha_t \beta'} (Model A) or \eqn{C_t = \alpha \beta_t'} (Model B). For
+details on the model fitting algorithm see Brune et al. (2021+).
+
+Precisely, model A is
+\deqn{y_t = \alpha_t\beta'x_t + \Gamma u_t + \epsilon_t}
+
+and model B is given by
+
+\deqn{y_t = \alpha \beta'x_t + \Gamma u_t + \epsilon_t.}
+
+Both models are fitted by an EM-algorithm. The actual model fitting happens in
+\code{fit_modelA} and \code{fit_modelB}. The function \code{tvRRR} calls these functions and,
+if \code{select_rank = TRUE} performs model selection with BIC. Here, \code{d_max} denotes
+the maximum dimension that should be fitted. If \code{d_max = NULL}, \code{d} is interpreted
+as \code{d_max}. \code{tvRRR} determines starting values automatically, but also allows for
+manually handing over appropriate starting values. For details, also see \link{fit_modelA()} and
+\link{fit_modelB()}.
+
+Arguments that can be handed over to guide the behavior of the algorithm are
+
+\itemize{
+\item \code{return_covariances} logical, indicates whether the state covariances
+should be returned (might be necessary for evaluation
+of the likelihood).
+\item \code{silent} logical, indicates whether progress should be printed during
+model fitting
+\item \code{maxit} maximum number of iterations for the EM algorithm
+\item \code{tol_finish} tolerance for stopping the EM algorithm
+\item \code{tol_EMstep} tolerance for iterative estimation during EM step
+}
+
+Arguments regarding the starting values for the EM-algorithm are, if no initial
+values are handed over:
+
+\itemize{
+\item \code{initialize} either \code{"RRR"} or \code{"random"}, applies if no starting
+values are handed over, then initialization is either carried
+out randomly or from time-constant reduced rank regression.
+\item \code{Gamma_rrr} if initialization is carried out by RRR, this specifies the
+normalization of \eqn{\alpha} and \eqn{\beta}
+}
+
+If we want to hand over starting values explicitly:
+
+\itemize{
+\item \code{alpha_00} initial value for the Kalman filter in model A
+\item \code{alpha} starting value for the time-constant matrix \eqn{\alpha} in model B
+\item \code{beta_00} initial value for the Kalman filter in model B. \strong{ATTENTION:}
+this has to be the transpose of \eqn{\beta}, i.e. \eqn{\beta'}
+\item \code{beta} starting value for the time-constant matrix \eqn{\beta}
+\item \code{Gamma} starting value for the fixed full-rank coefficient matrix
+\item \code{P_00} starting state covariance (default \code{1000 * diag(p * d)} for
+model A and \code{1000 * diag(q * d)} for model B)
+\item \code{Sigma} column covariance of states (default 0.1 * diag(d))
+\item \code{Omega} error covariance (defaults to residual covariance from the starting values)
+}
+
+Furthermore:
+
+\code{Omega_diagonal} logical, indicates whether Omega is assumed to be a
+diagonal matrix (advisable if p is large)
 }
 \seealso{
 \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}

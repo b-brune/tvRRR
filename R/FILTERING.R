@@ -29,8 +29,8 @@
 #'  make sure you hand over the transposed matrix to \code{beta_00}.
 #'
 #'
-#' @returns An object of class \code{tvRRR}, that is
-#' a named list of lists with elements
+#' @returns
+#' An object of class \code{tvRRR}, that is a named list of lists with elements
 #' \describe{
 #'  \item{states}{the filtered states, a named list with elements
 #'  \itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
@@ -214,7 +214,6 @@ filter_modelA <- function(y, X, u = NULL,
 #' Function that runs the Kalman filter for model (B)
 #'
 #' @rdname eval_tvRRR
-#'
 #' @export
 filter_modelB <- function(X, y, u = NULL,
                           P_00, Sigma, Omega,

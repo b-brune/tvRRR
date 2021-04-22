@@ -2,37 +2,126 @@
 % Please edit documentation in R/FILTERING.R
 \name{eval_tvRRR}
 \alias{eval_tvRRR}
-\title{Filtering:}
+\alias{filter_modelA}
+\alias{filter_modelB}
+\title{Filtering for the tvRRR model}
 \usage{
-eval_tvRRR(X, y, u = NULL, d, model = "A", alpha, beta, ...)
+eval_tvRRR(
+  X,
+  y,
+  u = NULL,
+  d,
+  model = "A",
+  alpha,
+  beta,
+  Omega,
+  Sigma,
+  P_00,
+  ...
+)
+
+filter_modelA(
+  y,
+  X,
+  u = NULL,
+  beta,
+  alpha_00,
+  Gamma = NULL,
+  P_00,
+  Sigma,
+  Omega,
+  d,
+  return_covariances = TRUE
+)
+
+filter_modelB(
+  X,
+  y,
+  u = NULL,
+  P_00,
+  Sigma,
+  Omega,
+  beta_00,
+  alpha,
+  Gamma = NULL,
+  d,
+  return_covariances = TRUE,
+  Gamma_rrr = "identity"
+)
 }
 \arguments{
-\item{X}{the predictors}
+\item{X}{the predictors (t x q matrix)}
 
-\item{y}{the target variable}
+\item{y}{the target variable (t x p matrix)}
 
-\item{u}{additional predictors that come in as full rank}
+\item{u}{(optional) additional predictors that do not necessarily vary in
+time (t x k matrix)}
 
 \item{d}{latent dimension (min. 1, no default)}
 
-\item{model}{specifies whether we're filtering in model "A" or model "B"}
+\item{model}{specifies the model to be fitted, either \code{"A"} or \code{"B"}}
 
-\item{alpha}{starting value for the algorithm, or the time-constant parameter matrix (p x d)}
+\item{alpha}{starting value for the algorithm, or the time-constant parameter matrix (p x d),
+for model A this corresponds to \code{alpha_00}, for model B it corresponds to the time-constant
+parameter \code{alpha}}
 
-\item{beta}{starting value for the algorithm, or time-constant parameter matrix (q x d)}
+\item{beta}{starting value for the algorithm, or time-constant parameter matrix (q x d),
+for model A this corresponds to the time-constant parameter \code{beta},
+for model B it corresponds to the initial state \code{beta_00}}
 
-\item{Gamma}{(optional), the time constant full rank (t x k) matrix}
-
-\item{P_00}{starting covariance for the algorithm (p\emph{d x p}d matrix for A, (q\emph{d x q}d) matrix for B)}
+\item{Omega}{error covariance in the measurement equation (symmetric p x p matrix)}
 
 \item{Sigma}{column covariance of the states alpha_t (symmetric d x d matrix)}
 
-\item{Omega}{error covariance in the measurement equation (symmetric p x p matrix)}
+\item{P_00}{starting covariance for the algorithm (p\emph{d x p}d matrix)}
+
+\item{Gamma}{(optional), the time constant full rank (t x k) matrix}
+
+\item{return_covariances}{logical, indicates whether the filtered and smoothed covariances should be returned,
+defaults to \code{FALSE}.}
 }
 \value{
-An object of class \code{tvRRR} (LINK TO DOCUMENTATION OF tvRRR CLASS ->
-DAS IST EIGENTLICH GELOGEN, mal gucken wie wir das lösen können)
+An object of class \code{tvRRR}, that is a named list of lists with elements
+\describe{
+\item{states}{the filtered states, a named list with elements
+\itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
+\item smoothed (the smoothed states) -- one state matrix per row (t + 1 x p * d)
+\item one-step-ahead (one-step ahead predictions of the states -- one state matrix per row (t + 1 x p * d))
+}
+}
+\item{covariances}{the filtered and smoothed covariances and lag-1 covariances,
+if \code{return_covariances = TRUE}, a named list with elements
+\itemize{\item \code{P_t^t} filtered covariances -- array of dimensions (t+1, p\emph{d, p}d)
+\item \code{P_t^t-1}predicted covariances -- (t, p\emph{d, p}d)
+\item \code{P_t^T} smoothed covariances -- (t+1, p\emph{d, p}d)
+\item \verb{P_t-1t-2^T} smoothed lag-1 covariances -- (t, p\emph{d, p}d),
+}
+else \code{NULL}}
+\item{prediction_covariance}{contains \code{P_t^T}\link{T, , } which is necessary for one-step
+ahead prediction of \code{tvRRR} object.}
+\item{data}{the data handed over to the algorithms, a named list with elements
+\itemize{
+\item \code{X} predictors -- (t, q)
+\item \code{y} responses -- (t, p)
+\item \code{u} additional predictors -- (t, k)
+\item \code{Z} transition matrices (X_t'beta (x) I_p) -- (t, p, p*d)
+}
+}
+\item{parameters}{the parameters used for filtering:
+\itemize{
+\item Sigma -- (d, d)
+\item Omega -- (p, p)
+\item beta -- (q, d) (for model A)
+\item alpha -- (p, d) (for model B)
+}
+}}
 }
 \description{
-Run the Kalman filter for a fixed set of parameters and prespecified model
+Run the Kalman filter for a fixed set of parameters and prespecified model A or B as
+defined in Brune, Bura and Scherrer (2021+).
+}
+\details{
+\code{eval_tvRRR()} calls \code{filter_modelA()} or \code{filter_modelB()} respectively.
+\code{filter_modelB()} processes the transposed states, i.e. when directly using this function
+make sure you hand over the transposed matrix to \code{beta_00}.
 }
