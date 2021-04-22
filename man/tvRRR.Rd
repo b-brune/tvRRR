@@ -78,6 +78,7 @@ the fitting procedure, i.e.
 }
 \item{convergence_information}{Message containing parameter stages at convergence}
 \item{BIC}{Value of the information criterion for the selected model}
+\item{rank}{The rank of the model}
 }
 }
 \description{
