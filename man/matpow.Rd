@@ -9,3 +9,4 @@ matpow(A, pow, symmetric = FALSE, tol = 1e-07)
 \description{
 GENERALIZED MATRIX POWER FUNCTION FOR SYMMETRIC MATRICES (by Daniel Kapla)
 }
+\keyword{internal}

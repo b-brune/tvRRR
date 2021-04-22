@@ -14,3 +14,4 @@ grassmann_dist(
 \description{
 UNNORMALIZED GRASSMANN DISTANCE (BASED ON PRINCIPAL ANGLES)
 }
+\keyword{internal}

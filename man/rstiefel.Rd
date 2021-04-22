@@ -9,3 +9,4 @@ rstiefel(p, d)
 \description{
 draw random matrix from Stiefel manifold
 }
+\keyword{internal}

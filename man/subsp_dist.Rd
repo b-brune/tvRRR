@@ -9,3 +9,4 @@ subsp_dist(X, Y)
 \description{
 NORMALIZED SUBSPACE DISTANCE (FROBENIUS OF PROJECTION DIFFERENCE)
 }
+\keyword{internal}

@@ -9,3 +9,4 @@ polar_proj(X)
 \description{
 POLAR PROJECTION OF A MATRIX ONTO ITS ORTHOGONAL PART
 }
+\keyword{internal}

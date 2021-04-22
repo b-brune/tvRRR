@@ -23,3 +23,4 @@ make_VARdataset_break(
 \description{
 VAR-dataset that contains a break
 }
+\keyword{internal}

@@ -26,3 +26,4 @@ Dataset where the time-varying parameter matrices perform a random walk in
 euclidean space where Cov(vec(alpha_t)) = kronecker(Sigma, Delta), Sigma
 is dxd (column covariance) and Delta is pxp (row covariance)
 }
+\keyword{internal}

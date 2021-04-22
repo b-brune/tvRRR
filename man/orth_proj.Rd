@@ -9,3 +9,4 @@ orth_proj(A)
 \description{
 #' ORTHOGONAL PROJECTION ONTO SPAN(A)
 }
+\keyword{internal}

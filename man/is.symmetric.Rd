@@ -9,3 +9,4 @@ is.symmetric(A)
 \description{
 Check whether a matrix is symmetric
 }
+\keyword{internal}

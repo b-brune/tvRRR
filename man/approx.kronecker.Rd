@@ -33,3 +33,4 @@ approx.kronecker(C, dim(A), dim(B))
 C.F. Van Loan / Journal of Computational and Applied Mathematics
 123 (2000) 85-100 (pp. 93-95)
 }
+\keyword{internal}

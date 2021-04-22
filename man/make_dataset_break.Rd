@@ -23,3 +23,4 @@ make_dataset_break(
 \description{
 Dataset that contains a structural break
 }
+\keyword{internal}

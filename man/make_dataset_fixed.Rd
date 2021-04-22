@@ -18,3 +18,4 @@ make_dataset_fixed(
 \description{
 Matrices are actually fixed
 }
+\keyword{internal}

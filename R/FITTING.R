@@ -15,6 +15,9 @@
 #' @param u additional predictors (t x k-dimensional numeric matrix)
 #' @param model determines the model to be fit, either `"A"` or `"B"`.
 #' @param d_max maximum latent dimension, needs to be an integer and can at most be min(p, q)
+#' @param d (maximum) latent dimension, needs to be an integer and can at most be min(p, q)
+#' @param select_rank logical, indicates whether the rank should be selected by BIC or whether
+#'                    a model of rank `d` (or `d_max`) should be fit
 #' @param Sigma_init optional, modifies the initial state covariance defined as \code{Sigma_init * diag(d)}
 #' @param ...  additional parameters such as starting values handed over to the EM-algorithms
 #'             for models A and B, see details.
@@ -134,7 +137,8 @@
 #'
 #' @seealso \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}
 #'
-#' @example
+#' @examples
+#'
 #'
 #' @export
 

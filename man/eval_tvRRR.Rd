@@ -97,7 +97,7 @@ if \code{return_covariances = TRUE}, a named list with elements
 \item \verb{P_t-1t-2^T} smoothed lag-1 covariances -- (t, p\emph{d, p}d),
 }
 else \code{NULL}}
-\item{prediction_covariance}{contains \code{P_t^T}\link{T, , } which is necessary for one-step
+\item{prediction_covariance}{contains \code{P_t^T[t+1, , ]} which is necessary for one-step
 ahead prediction of \code{tvRRR} object.}
 \item{data}{the data handed over to the algorithms, a named list with elements
 \itemize{

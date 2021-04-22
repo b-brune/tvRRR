@@ -28,6 +28,11 @@ fit_tvRRR(X, y, u = NULL, d, model = "A", ...)
 
 \item{model}{determines the model to be fit, either \code{"A"} or \code{"B"}.}
 
+\item{d}{(maximum) latent dimension, needs to be an integer and can at most be min(p, q)}
+
+\item{select_rank}{logical, indicates whether the rank should be selected by BIC or whether
+a model of rank \code{d} (or \code{d_max}) should be fit}
+
 \item{d_max}{maximum latent dimension, needs to be an integer and can at most be min(p, q)}
 
 \item{Sigma_init}{optional, modifies the initial state covariance defined as \code{Sigma_init * diag(d)}}
@@ -36,7 +41,7 @@ fit_tvRRR(X, y, u = NULL, d, model = "A", ...)
 for models A and B, see details.}
 }
 \value{
-#' An object of class \code{tvRRR}, that is a named list of lists with elements
+An object of class \code{tvRRR}, that is a named list of lists with elements
 \describe{
 \item{states}{the filtered states, a named list with elements
 \itemize{\item filtered (the filtered states) -- one state matrix per row (t + 1 x p * d)
@@ -52,7 +57,7 @@ if \code{return_covariances = TRUE}, a named list with elements
 \item \verb{P_t-1t-2^T} smoothed lag-1 covariances -- (t, p\emph{d, p}d),
 }
 else \code{NULL}}
-\item{prediction_covariance}{contains \code{P_t^T}\link{T, , } which is necessary for one-step
+\item{prediction_covariance}{contains \code{P_t^T[t+1, , ]} which is necessary for one-step
 ahead prediction of \code{tvRRR} object.}
 \item{data}{the data handed over to the algorithms, a named list with elements
 \itemize{
@@ -151,6 +156,10 @@ Furthermore:
 
 \code{Omega_diagonal} logical, indicates whether Omega is assumed to be a
 diagonal matrix (advisable if p is large)
+}
+\examples{
+
+
 }
 \seealso{
 \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}
