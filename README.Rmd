@@ -1,0 +1,64 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# tvRRR - Time-varying reduced rank regression using state-space models
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The tvRRR package implements time-varying reduced rank regression as proposed in *A state-space approach to time-varying reduced rank regression* (Brune, Bura and Scherrer, 2021+).  
+
+## Installation
+
+The development version can be installed from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("b-brune/tvRRR")
+```
+
+## Model
+
+The model that is fitted is a reduced-rank regression with time-varying coefficient matrices. We implement two types of time-variation, called model (A) and model (B):
+
+\[(A) \quad y_t = \alpha_t\beta'x_t + \Gamma u_t + \varepsilon_t\]
+\[(B) \quad y_t = \alpha\beta_t'x_t + \Gamma u_t + \varepsilon_t\]
+
+Model fitting is carried out using a Gaussian linear state-space model and the Kalman filter.
+
+## Example application
+
+The function `dataset()` draws data from models (A) and (B) with different specifications of the time-variation in the parameter matrix. 
+
+```{r example}
+library(tvRRR)
+
+set.seed(712)
+dat <- dataset("VARbreak", p = 5, d = 2, q = 5, t = 100, forecast = 20, model = "A")
+X <- dat$X; y <- dat$y
+```
+
+The main function of the dataset is `tvRRR()`. It automatically selects the rank of the model using BIC (in case it is unknown) and fits the tvRRR model.
+
+```{r model fitting}
+fit <- tvRRR(X = X, y = y, select_rank = TRUE, 
+             d_max = 5, maxit = 120, silent = TRUE, model = "A")
+
+fit
+```
+
+`tvRRR()` returns a list of the filtered time-varying parameters (one-step-ahead, filtered and smoothed), as well as the fitted parameters and some information on the data log-likelihood and convergence. 
+
+For more information on the model fitting algorithm see the paper.
