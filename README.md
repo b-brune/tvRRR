@@ -1,16 +1,18 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# tvRRR –
+# tvRRR
 
 ## Time-varying reduced rank regression using state-space models
 
 <!-- badges: start -->
 <!-- badges: end -->
 
+**WORK IN PROGRESS**
+
 The tvRRR package implements time-varying reduced rank regression as
-proposed in *A state-space approach to time-varying reduced rank
-regression* (Brune, Bura and Scherrer, 2021+).
+proposed in *A state-space approach to time-varying reduced-rank
+regression* (Work in progress, Brune, Bura and Scherrer, 2021+).
 
 ## Installation
 

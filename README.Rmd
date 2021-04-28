@@ -13,14 +13,16 @@ knitr::opts_chunk$set(
 )
 ```
 
-# tvRRR --
+# tvRRR
 
 ## Time-varying reduced rank regression using state-space models
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The tvRRR package implements time-varying reduced rank regression as proposed in *A state-space approach to time-varying reduced rank regression* (Brune, Bura and Scherrer, 2021+).  
+**WORK IN PROGRESS**
+
+The tvRRR package implements time-varying reduced rank regression as proposed in *A state-space approach to time-varying reduced-rank regression* (Work in progress, Brune, Bura and Scherrer, 2021+).  
 
 ## Installation
 
