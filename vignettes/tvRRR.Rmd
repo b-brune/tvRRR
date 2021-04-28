@@ -1,0 +1,168 @@
+---
+title: "tvRRR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the tvRRR R-package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The tvRRR package implements time-varying reduced-rank regression based on a linear Gaussian state-space model. 
+
+
+## Models
+
+The models under consideration are
+
+$$
+\begin{eqnarray}
+(A) \quad & y_t & = \alpha_t\beta'x_t + \Gamma u_t + \varepsilon_t \\ 
+          &\operatorname{vec}(\alpha_{t+1}) & =  \operatorname{vec}(\alpha_{t})  + \eta_{t+1} \\
+          & & \text{ and }  \\
+(B) \quad & y_t & = \alpha\beta_t'x_t + \Gamma u_t + \varepsilon_t \\ 
+          &\operatorname{vec}(\beta_{t+1}') & =  \operatorname{vec}(\beta_{t}')  + \eta_{t+1} \\
+\end{eqnarray}
+$$
+where $y_t\in\mathbb{R}^p$, $x_t\in\mathbb{R}^q$, $u_t\in\mathbb{R}^k$, $\alpha_t,\alpha\in\mathbb{R}^{p\times d}$, $\beta_t,\beta\in\mathbb{R}^{q\times d}$, $\Gamma\in\mathbb{R}^{p\times k}$. Furthermore, $\epsilon_t \sim \mathcal{N}(0, \Omega)$ and $\eta_t\sim\mathcal{N}(0, \Sigma_c\otimes I_p)$. 
+
+The time-varying parameters $\alpha_t$, resp. $\beta_t$ are filtered using the Kalman filter, the unknown time-constant parameters are estimated with an EM-algorithm. 
+
+## Example of application
+
+```{r setup}
+library(tvRRR)
+suppressMessages(library(tidyverse))
+```
+
+To illustrate the capabilities of the tvRRR package, we will show an example of how the packages functions may be used. This includes:
+
+* Drawing data from different models, as also used for the simulation study in the accompanying paper
+* Fitting the tvRRR model with automatic selection of the rank of the coefficient matrix $d$
+* Printing information regarding convergence
+* Calculating fitted values and predicting future values from the observations
+* Plotting results -- What would be a good plotting method?
+
+We will go through the workflow using a dataset generated from the `dataset()` function.  
+
+$$
+\begin{eqnarray}
+    y_t = \alpha_t\beta'y_{t-1} +\varepsilon_t, \text{ where } \alpha_t = \begin{cases} \alpha_1, & \text{ for } t \leq 50 \\ \alpha_2 & \text{ for } t > 50 \end{cases}, \quad \varepsilon_t\sim\mathcal{N}_5(0,I_5), 
+\end{eqnarray}
+$$ 
+where $\alpha_1$, $\alpha_2$ and $\beta$ are random orthonormal matrices. Thus, the VAR(1) relationship between the models exhibits a ``structural break''. We set $p=5$, $d=2$, and draw a time-series of length $t=100$ with additional 50 observations for forecasting. Such a dataset can be drawn using  
+
+```{r draw data}
+set.seed(712)
+dat <- dataset("VARbreak", p = 5, d = 2, q = 5, t = 100, forecast = 50, model = "A")
+```
+
+The `dat` object contains realizations of `X` (i.e. $y_{t-1}$) and `y` (i.e. $y_t$), as well as the errors ($\varepsilon_t$) and the model parameters: An array of the time-varying coefficient matrices `alpha`, the second part of the reduced-rank regression matrix `beta` and the error covariance `Omega`.
+
+```{r str_dat}
+str(dat)
+```
+
+The trajectories of the time-series drawn from this model are then:
+
+```{r plot ts, echo = FALSE, fig.width = 6}
+ggplot(dat$y %>% as_tibble %>% mutate(t = 1:150) %>% pivot_longer(-t),
+       aes(x = t, y = value)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(name ~ ., ncol = 2) +
+  geom_vline(xintercept = 50, linetype = "dotted", color = "red")+
+  theme(
+    strip.background = element_blank(),
+    strip.text.x = element_blank()
+  ) +
+  xlab("Time") + ylab(expression(y[t])) +
+  ggtitle("Trajectories of the time-series")
+```
+
+Now we fit the model. This is done using the `tvRRR()` function of the package. The rank of the model is selected automatically (specified by `select_rank = TRUE`), the maximum rank is set to $p=q=5$, i.e. a full rank model. If `silent = FALSE` a short summary with convergence information for each model is printed during the model fitting.
+We fit the model to the first 100 observations.
+
+```{r}
+fit <- tvRRR(X = dat$X[1:100, ], y = dat$y[1:100, ], select_rank = TRUE, d_max = 5, 
+             return_covariances = FALSE, silent = FALSE)
+```
+
+The `print()` method then gives some information on the convergence procedure and the model fit as well as the rank selected by the model.
+
+```{r print fit}
+fit
+```
+
+The rank selected is 2. Furthermore, the state covariance matrix $\Sigma_c$ is printed.
+
+The `fit` object contains a lot the one-step-ahead predictions, filtered and smoothed states, the data and the estimated parameters. `prediction_covariance` contains the smoothed covariance matrix at time $t$. Furthermore we may find some information on convergence of the algorithm and the trajectory of the data log-likelihood during the optimization process.
+
+```{r structure of tvRRR object}
+str(fit)
+```
+
+We can plot the likelihood with
+
+```{r, fig.width = 6}
+ggplot(tibble(Iteration = 1:fit$iter, `Log-Likelihood` = fit$likelihoods.loglik),
+       aes(x = Iteration, y = `Log-Likelihood`)) +
+  geom_line() +
+  geom_point() +
+  theme_bw()
+```
+
+It jumps rapidly at first and then stabilizes. Convergence is reached after 26 iterations.
+
+
+In a next step, we can assess model fit. We can calculate fitted values from the filtered or the smoothed states using the `fitted()` method.
+
+```{r}
+y_fit_f <- fitted(fit, type = "filtered")
+y_fit_sm <- fitted(fit, type = "smoothed")
+```
+
+
+```{r, fig.width = 6}
+cum_err <- tibble(t = 1:100,
+  filtered = cumsum(apply((dat$y[1:100, ] - y_fit_f), 1, function(x) mean(x^2))),
+  smoothed = cumsum(apply((dat$y[1:100, ] - y_fit_sm), 1, function(x) mean(x^2))),
+  true = cumsum(apply(dat$errors[1:100, ], 1, function(x) mean(x^2))))
+
+ggplot(cum_err %>% pivot_longer(-t),
+       aes(x = t, y = value, linetype = name)) +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dotted") +
+  ylab("Cumulative error sum")
+```
+
+Lastly, we can predict the future observations with 1-step-ahead forecasts (i.e. using the information up to time $t-1$ using the fitted model).
+
+```{r}
+y_pred <- predict(fit, newdata = list(X = dat$X[101:150, ], y = dat$y[101:150, ]))
+```
+
+Now look at the cumulative errors for prediction.
+```{r, fig.width = 6}
+cum_err_pred <- tibble(
+  t = 101:150,
+  filtered = cumsum(apply((dat$y[101:150, ] - y_pred), 1, function(x) mean(x^2))),
+  true = cumsum(apply(dat$errors[101:150, ], 1, function(x) mean(x^2))))
+
+ggplot(cum_err_pred %>% pivot_longer(-t),
+       aes(x = t, y = value, linetype = name)) +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  geom_abline(slope = 1, intercept = -100, color = "red", linetype = "dotted") +
+  ylab("Cumulative error sum")
+```
+
