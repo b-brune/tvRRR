@@ -10,7 +10,7 @@ fit_modelA(
   u = NULL,
   d,
   beta = NULL,
-  alpha = NULL,
+  alpha_00 = NULL,
   Gamma = NULL,
   P_00 = 1000 * diag(ncol(y) * d),
   Sigma = NULL,
@@ -35,6 +35,8 @@ fit_modelA(
 \item{d}{latent dimension}
 
 \item{beta}{starting value for beta, default NULL (RRR)}
+
+\item{alpha_00}{starting value for the algorithm, default NULL (RRR)}
 
 \item{Gamma}{starting value for the fixed full-rank coefficient matrix,
 default NULL (RRR)}
@@ -68,8 +70,6 @@ of the likelihood).}
 
 \item{initialize}{either \code{"RRR"} or \code{"random"}, applies if no starting
 values are handed over}
-
-\item{alpha_00}{starting value for the algorithm, default NULL (RRR)}
 }
 \value{
 An object of class \code{tvRRR}, that is a named list of lists with elements

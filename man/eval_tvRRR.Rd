@@ -75,10 +75,14 @@ for model B it corresponds to the initial state \code{beta_00}}
 
 \item{P_00}{starting covariance for the algorithm (p\emph{d x p}d matrix)}
 
+\item{alpha_00}{initial state}
+
 \item{Gamma}{(optional), the time constant full rank (t x k) matrix}
 
 \item{return_covariances}{logical, indicates whether the filtered and smoothed covariances should be returned,
 defaults to \code{FALSE}.}
+
+\item{beta_00}{initial state}
 }
 \value{
 An object of class \code{tvRRR}, that is a named list of lists with elements

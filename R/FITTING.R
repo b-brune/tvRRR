@@ -164,19 +164,16 @@ tvRRR <- function(X, y, u = NULL, model = "A",
 
   else if (select_rank) {
 
-    if (criterion != "BIC") stop("The model selection criterion you chose is not
-                                 yet implemented.")
 
     if (missing(d_max) & !missing(d)) d_max <- d
     if (missing(d_max) & missing(d)) d_max <- q
 
-    if (length(criterion) > 1) criterion <- criterion[1]
+    # if (length(criterion) > 1) criterion <- criterion[1]
 
     stopifnot(
       "d_max needs to be numeric" = { is.numeric(d_max) },
       "d_max needs to be an integer number" = { d_max %% 1 == 0 },
-      "d_max must not be larger than min(ncol(X), ncol(y))" = { d_max <= min(ncol(X), ncol(y)) },
-      "Criterion needs to be 'AIC' or 'BIC" = { criterion %in% c("AIC", "BIC") }
+      "d_max must not be larger than min(ncol(X), ncol(y))" = { d_max <= min(ncol(X), ncol(y)) }
     )
 
     crit <- rep(NA, d_max)
@@ -186,25 +183,20 @@ tvRRR <- function(X, y, u = NULL, model = "A",
     for (d_try in 1:d_max) {
       models[[d_try]] <- fit_tvRRR(X = X, y = y, u = u, d = d_try,
                                    model = model, Sigma = Sigma_init * diag(d_try), ...)
-      crit[d_try] <- {
-        if (criterion == "BIC") {
-          BIC_tvRRR(kf = models[[d_try]], d = d_try, model = model)
-        }
-      }
+      crit[d_try] <- BIC_tvRRR(kf = models[[d_try]], d = d_try, model = model)
+
     }
 
     # What do I want to return?
 
     fit <- models[[which.min(crit)]]
 
-    if (criterion == "BIC") {
-      fit$BIC <- min(crit)
-    }
+    fit$BIC <- min(crit)
 
     fit$convergence_information <- paste0(
-      "Model selected based on ", criterion, "\n\n",
+      "Model selected based on BIC", "\n\n",
       "Tried d = 1 to d = ", d_max, "\n",
-      "Rank selected: d = ", which.min(crit), " with ", criterion, " ", round(min(crit), 6), "\n\n",
+      "Rank selected: d = ", which.min(crit), " with BIC ", round(min(crit), 6), "\n\n",
       "Model diagnostics / Convergence information \n\n",
       fit$convergence_information)
 
@@ -352,7 +344,7 @@ fit_tvRRR <- function(X, y, u = NULL, d, model = "A",
 fit_modelA <- function(X, y, u = NULL,
                        d,
                        beta = NULL, # model parameters
-                       alpha = NULL,
+                       alpha_00 = NULL,
                        Gamma = NULL,
                        P_00 = 1000 * diag(ncol(y) * d),  # starting values
                        Sigma = NULL, # column covariance

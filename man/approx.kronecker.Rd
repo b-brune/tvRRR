@@ -22,13 +22,6 @@ C = A \%x\% B
 with \code{\%x\%} the kronecker product of the matrixes \code{A} and \code{B}
 of dimensions \code{dimA} and \code{dimB} respectively.
 }
-\examples{
-A <- matrix(seq(14), 7, 2)
-B <- matrix(c(TRUE, FALSE), 3, 4)
-C <- kronecker(A, B) # the same as 'C <- A \%x\% B'
-approx.kronecker(C, dim(A), dim(B))
-
-}
 \seealso{
 C.F. Van Loan / Journal of Computational and Applied Mathematics
 123 (2000) 85-100 (pp. 93-95)

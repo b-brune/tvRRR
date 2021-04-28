@@ -81,9 +81,11 @@ eval_tvRRR <- function(X,
                        P_00,
                        ...) {
 
-  if (model == "A") kf <- filter_modelA(X = X, y = y, u = u, alpha_00 = alpha, beta = beta, d = d, ...)
+  if (model == "A") kf <- filter_modelA(X = X, y = y, u = u, alpha_00 = alpha, beta = beta, d = d, P_00 = P_00,
+                                        Omega = Omega, Sigma = Sigma, ...)
 
-  if (model == "B") kf <- filter_modelB(X = X, y = y, u = u, alpha = alpha, beta_00 = t(beta), d = d, ...)
+  if (model == "B") kf <- filter_modelB(X = X, y = y, u = u, alpha = alpha, beta_00 = t(beta), d = d, P_00 = P_00,
+                                        Omega = Omega, Sigma = Sigma, ...)
 
   class(kf) <- "tvRRR"
 
@@ -100,6 +102,7 @@ eval_tvRRR <- function(X,
 
 #' Function that runs the Kalman filter for model A
 #'
+#' @param alpha_00 initial state
 #' @rdname eval_tvRRR
 #' @export
 
@@ -213,6 +216,7 @@ filter_modelA <- function(y, X, u = NULL,
 
 #' Function that runs the Kalman filter for model (B)
 #'
+#' @param beta_00 initial state
 #' @rdname eval_tvRRR
 #' @export
 filter_modelB <- function(X, y, u = NULL,
