@@ -12,7 +12,7 @@
 
 The tvRRR package implements time-varying reduced rank regression as
 proposed in *A state-space approach to time-varying reduced-rank
-regression* (Work in progress, Brune, Bura and Scherrer, 2021+).
+regression* (Work in progress, Brune, Bura and Scherrer).
 
 ## Installation
 
@@ -20,7 +20,9 @@ The development version can be installed from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
+if (!require(devtools)) {
+  install.packages("devtools")
+}
 devtools::install_github("b-brune/tvRRR")
 ```
 
@@ -94,3 +96,15 @@ convergence.
 
 For more information on the model fitting algorithm see the paper, the
 accompanying vignette, and the function’s documentation.
+
+### Contributions
+
+We are grateful for any contribution to the further development of the R
+package. If you experience any problems using the package or have
+suggestions for new features, please open an issue in the [issue
+tracker](https://github.com/b-brune/tvRRR/issues).
+
+## Author
+
+**Barbara Brune** ( [b-brune](https://github.com/b-brune) ) - *TU Wien,
+Vienna, Austria*
