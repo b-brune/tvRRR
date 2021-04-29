@@ -191,6 +191,8 @@ tvRRR <- function(X, y, u = NULL, model = "A",
     fit <- models[[which.min(crit)]]
 
     fit$BIC <- min(crit)
+    fit$other_BICs <- crit
+    names(fit$other_BICs) <- 1:d_max
 
     fit$convergence_information <- paste0(
       "Model selected based on BIC", "\n\n",
