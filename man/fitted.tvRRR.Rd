@@ -4,10 +4,10 @@
 \alias{fitted.tvRRR}
 \title{Calculate fitted values from tvRRR object}
 \usage{
-\method{fitted}{tvRRR}(kf, type = "filtered", model, ...)
+\method{fitted}{tvRRR}(object, type = "filtered", model, ...)
 }
 \arguments{
-\item{kf}{an object of class \code{tvRRR}}
+\item{object}{an object of class \code{tvRRR}}
 
 \item{type}{either \code{filtered} or \code{smoothed}, defaults to filtered}
 

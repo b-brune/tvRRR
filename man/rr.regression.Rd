@@ -2,12 +2,33 @@
 % Please edit documentation in R/UTILITY.R
 \name{rr.regression}
 \alias{rr.regression}
-\title{RRR with additional full-rank predictors
-taken from Reinsel and Velu (1998), Ch. 3, Thm. 3.1
-u corresponds to their z}
+\title{Reduced rank regression}
 \usage{
 rr.regression(X, y, u = NULL, rank, Gamma_type = "identity")
 }
-\description{
+\arguments{
+\item{X}{matrix of predictors, dimensions (t x q)}
+
+\item{y}{matrix of responses, dimensions (t x p)}
+
+\item{u}{matrix of additional predictors with full rank coefficient matrix, dimensions (t x k),
+optional.}
+
+\item{rank}{presumed rank of the coefficient matrix}
+
+\item{Gamma_type}{normalization, can be \code{"identity"}, \code{"OLS"} or "\verb{cov_y"}, see
+Reinsel and Velu for details}
+}
+\value{
+A named list with elements \code{A}, \code{B}, \code{C = A \%*\% B}, \code{D} and \code{mu}.
+
 Model: y = mu + ABX + Du + error
+}
+\description{
+RRR with additional full-rank predictors
+taken from Reinsel and Velu (1998), Ch. 3, Thm. 3.1
+u corresponds to their z. The model is
+}
+\details{
+\deqn{y = mu + A B X + D u + epsilon}
 }

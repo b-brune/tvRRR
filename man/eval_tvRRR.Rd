@@ -14,10 +14,10 @@ eval_tvRRR(
   model = "A",
   alpha,
   beta,
+  Gamma = NULL,
   Omega,
   Sigma,
-  P_00,
-  ...
+  P_00
 )
 
 filter_modelA(
@@ -45,8 +45,7 @@ filter_modelB(
   alpha,
   Gamma = NULL,
   d,
-  return_covariances = TRUE,
-  Gamma_rrr = "identity"
+  return_covariances = TRUE
 )
 }
 \arguments{
@@ -69,6 +68,8 @@ parameter \code{alpha}}
 for model A this corresponds to the time-constant parameter \code{beta},
 for model B it corresponds to the initial state \code{beta_00}}
 
+\item{Gamma}{(optional), the time constant full rank (t x k) matrix}
+
 \item{Omega}{error covariance in the measurement equation (symmetric p x p matrix)}
 
 \item{Sigma}{column covariance of the states alpha_t (symmetric d x d matrix)}
@@ -76,8 +77,6 @@ for model B it corresponds to the initial state \code{beta_00}}
 \item{P_00}{starting covariance for the algorithm (p\emph{d x p}d matrix)}
 
 \item{alpha_00}{initial state}
-
-\item{Gamma}{(optional), the time constant full rank (t x k) matrix}
 
 \item{return_covariances}{logical, indicates whether the filtered and smoothed covariances should be returned,
 defaults to \code{FALSE}.}

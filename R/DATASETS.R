@@ -12,21 +12,9 @@
 #'          randomly from a q-variate normal distribution with mean zero and
 #'          covariance identity
 #' @param model which model do we want? Either "A" or "B"
-#' @param alpha_0 optional
-#' @param alpha_1 optional (only used if \code{model = "A"} and
-#'                \code{type = c("break", "VARbreak", "deterministic")} )
-#' @param beta_0 optional
-#' @param beta_1 optional (only used if \code{model = "B"} and
-#'                \code{type = c("break", "VARbreak", "deterministic")} )
-#' @param Omega error covariance, defaults to the identity matrix
-#' @param shift only used if \code{type = c("break", "VARbreak", "deterministic")}),
-#'              guides how far the matrices are apart (see Details)
 #' @param forecast how many additional variables do we want to generate for
 #'                 forecasting experiments
-#' @param Sigma column covariance if \code{type = "rw"}
-#' @param Delta row covariance if \code{type = "rw"}, defaults to the identity
-#' @param breakpoint position of the structural break in the dataset for
-#'                   \code{type = c("break", "VARbreak")}
+#' @param ... additional variables specific to the different types, see Details.
 #'
 #' @returns A named list with the desired dataset, containing components
 #' \item{y}{the target variable (t x p) matrix}
@@ -39,6 +27,25 @@
 #' \item{Sigma}{if \code{type = "rw"} the column covariance of the states, (d, d) matrix}
 #'
 #' @details
+#'
+#' Optional parameters that may be handed over to the function are
+#' \itemize{
+#' \item `alpha_0` optional
+#' \item `alpha_1` optional (only used if \code{model = "A"} and
+#'                \code{type = c("break", "VARbreak", "deterministic")} )
+#' \item `beta_0` optional
+#' \item `beta_1` optional (only used if \code{model = "B"} and
+#'                \code{type = c("break", "VARbreak", "deterministic")} )
+#' \item `Omega` error covariance, defaults to the identity matrix
+#' \item `shift` only used if \code{type = c("break", "VARbreak", "deterministic")}),
+#'              guides how far the matrices are apart (see Details)
+#' \item `Sigma` column covariance if \code{type = "rw"}
+#' \item `Delta` row covariance if \code{type = "rw"}, defaults to the identity
+#' \item `breakpoint` position of the structural break in the dataset for
+#'                   \code{type = c("break", "VARbreak")}
+
+#'
+#' }
 #'
 #' @export
 
@@ -234,7 +241,7 @@ make_VARdataset_determ <- function(t = 100,
     alpha <- aperm(array(unlist(alpha), dim = c(p, d, len)), perm = c(3, 1, 2))
 
     y <- matrix(NA, len + 1, p)
-    y[1, ] <- rnorm(p)
+    y[1, ] <- stats::rnorm(p)
 
 
     errors <- mvtnorm::rmvnorm(len, sigma = Omega)
@@ -258,7 +265,7 @@ make_VARdataset_determ <- function(t = 100,
     beta <- aperm(array(unlist(beta), dim = c(q, d, len)), perm = c(3, 1, 2))
 
     y <- matrix(NA, len + 1, p)
-    y[1, ] <- rnorm(p)
+    y[1, ] <- stats::rnorm(p)
 
     beta <- lapply(1:len, function(i) if (i <= breakpoint) -shift * beta_0 else shift * beta_1)
 
@@ -332,7 +339,7 @@ make_VARdataset_break <- function(t = 100,
     alpha <- aperm(array(unlist(alpha), dim = c(p, d, len)), perm = c(3, 1, 2))
 
     y <- matrix(NA, len + 1, p)
-    y[1, ] <- rnorm(p)
+    y[1, ] <- stats::rnorm(p)
 
 
     errors <- mvtnorm::rmvnorm(len, sigma = Omega)
@@ -385,7 +392,7 @@ make_VARdataset_break <- function(t = 100,
     q <- p * lag
 
     y <- matrix(NA, len + 1, p)
-    y[1, ] <- rnorm(p)
+    y[1, ] <- stats::rnorm(p)
 
     beta <- lapply(1:len, function(i) if (i <= breakpoint) -shift * beta_0 else shift * beta_1)
 
@@ -537,7 +544,7 @@ make_dataset_rw <- function(X, alpha_0 = NULL, beta_0 = NULL, Omega = NULL,
   q <- ncol(X)
 
   if (is.null(Sigma)) {
-    Sigma <- 1 / t * drop(rWishart(1, d, Sigma = 1 / q * diag(d)))
+    Sigma <- 1 / t * drop(stats::rWishart(1, d, Sigma = 1 / q * diag(d)))
   }
 
 

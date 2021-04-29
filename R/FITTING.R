@@ -41,8 +41,8 @@
 #' if `select_rank = TRUE` performs model selection with BIC. Here, `d_max` denotes
 #' the maximum dimension that should be fitted. If `d_max = NULL`, `d` is interpreted
 #' as `d_max`. `tvRRR` determines starting values automatically, but also allows for
-#' manually handing over appropriate starting values. For details, also see \link{fit_modelA()} and
-#' \link{fit_modelB()}.
+#' manually handing over appropriate starting values. For details, also see \code{\link{fit_modelA}()}and
+#' \code{\link{fit_modelB}()}.
 #'
 #' Arguments that can be handed over to guide the behavior of the algorithm are
 #'
@@ -137,7 +137,6 @@
 #'
 #' @seealso \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}
 #'
-#' @examples
 #'
 #'
 #' @export
@@ -450,6 +449,7 @@ fit_modelA <- function(X, y, u = NULL,
     old_beta <- update$beta
     old_Omega <- update$Omega
     old_Sigma <- update$Sigma
+    old_Gamma <- update$Gamma
 
     # Run the filter with the updated parameters:
     kf <- filter_modelA(y = y, X = X, u = u, Sigma = update$Sigma,
@@ -468,7 +468,8 @@ fit_modelA <- function(X, y, u = NULL,
     # Store the likelihoods from previous iteration:
     Q[iter]      <- update$Q
     loglik[iter] <- X_eval_lik(kf = kf, beta = old_beta,
-                               Omega = old_Omega, Gamma = old_Gamma,
+                               Omega = old_Omega,
+                               Gamma = old_Gamma,
                                d = d, y = y, X = X)
 
     # Check for problems / convergence:
@@ -679,7 +680,6 @@ fit_modelB <- function(X, y, u = NULL, d,
   iter <- 1
 
   while (iter < maxit) {
-
 
     old_alpha <- update$alpha; old_Omega <- update$Omega; old_Gamma <- update$Gamma
     old_Sigma <- update$Sigma

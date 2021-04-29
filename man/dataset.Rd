@@ -29,27 +29,7 @@ forecasting experiments}
 
 \item{model}{which model do we want? Either "A" or "B"}
 
-\item{alpha_0}{optional}
-
-\item{alpha_1}{optional (only used if \code{model = "A"} and
-\code{type = c("break", "VARbreak", "deterministic")} )}
-
-\item{beta_0}{optional}
-
-\item{beta_1}{optional (only used if \code{model = "B"} and
-\code{type = c("break", "VARbreak", "deterministic")} )}
-
-\item{Omega}{error covariance, defaults to the identity matrix}
-
-\item{shift}{only used if \code{type = c("break", "VARbreak", "deterministic")}),
-guides how far the matrices are apart (see Details)}
-
-\item{Sigma}{column covariance if \code{type = "rw"}}
-
-\item{Delta}{row covariance if \code{type = "rw"}, defaults to the identity}
-
-\item{breakpoint}{position of the structural break in the dataset for
-\code{type = c("break", "VARbreak")}}
+\item{...}{additional variables specific to the different types, see Details.}
 }
 \value{
 A named list with the desired dataset, containing components
@@ -67,5 +47,21 @@ DATA GENERATING FUNCTIONS:
 This needs to be documented very carefully
 }
 \details{
+Optional parameters that may be handed over to the function are
+\itemize{
+\item \code{alpha_0} optional
+\item \code{alpha_1} optional (only used if \code{model = "A"} and
+\code{type = c("break", "VARbreak", "deterministic")} )
+\item \code{beta_0} optional
+\item \code{beta_1} optional (only used if \code{model = "B"} and
+\code{type = c("break", "VARbreak", "deterministic")} )
+\item \code{Omega} error covariance, defaults to the identity matrix
+\item \code{shift} only used if \code{type = c("break", "VARbreak", "deterministic")}),
+guides how far the matrices are apart (see Details)
+\item \code{Sigma} column covariance if \code{type = "rw"}
+\item \code{Delta} row covariance if \code{type = "rw"}, defaults to the identity
+\item \code{breakpoint} position of the structural break in the dataset for
+\code{type = c("break", "VARbreak")}
 
+}
 }

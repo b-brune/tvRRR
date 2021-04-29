@@ -97,7 +97,7 @@ polar_proj <- function(X) return(X %*% matpow(crossprod(X), -0.5))
 rstiefel <- function(p, d) {
   if (d > p) stop("The matrix needs to have more rows than columns.")
 
-  polar_proj(matrix(rnorm(p * d), p, d))
+  polar_proj(matrix(stats::rnorm(p * d), p, d))
 }
 
 #' #' ORTHOGONAL PROJECTION ONTO SPAN(A)
@@ -152,10 +152,24 @@ grassmann_dist <- function(A, B, tol = max(dim(A))* sqrt(.Machine$double.eps),
 ##
 ## Time-constant reduced rank regression
 ##
-
+#' Reduced rank regression
+#'
 #' RRR with additional full-rank predictors
 #' taken from Reinsel and Velu (1998), Ch. 3, Thm. 3.1
-#' u corresponds to their z
+#' u corresponds to their z. The model is
+#'
+#' \deqn{y = mu + A B X + D u + epsilon}
+#'
+#' @param X matrix of predictors, dimensions (t x q)
+#' @param y matrix of responses, dimensions (t x p)
+#' @param u matrix of additional predictors with full rank coefficient matrix, dimensions (t x k),
+#'          optional.
+#' @param rank presumed rank of the coefficient matrix
+#' @param Gamma_type normalization, can be `"identity"`, `"OLS"` or "`cov_y"`, see
+#'        Reinsel and Velu for details
+#'
+#' @returns A named list with elements `A`, `B`, `C = A %*% B`, `D` and `mu`.
+#'
 #'
 #' Model: y = mu + ABX + Du + error
 #' @export
@@ -175,13 +189,13 @@ rr.regression <- function(X, y, u = NULL, rank, Gamma_type = "identity") {
     Gamma_sq <- switch(
       Gamma_type,
       identity = diag(ncol(y)),
-      cov_y = matpow(cov(y), -1/2),
-      OLS = matpow(cov(y - X %*% MASS::ginv(X) %*% y), -1/2)
+      cov_y = matpow(stats::cov(y), -1/2),
+      OLS = matpow(stats::cov(y - X %*% MASS::ginv(X) %*% y), -1/2)
     )
 
-    Sigma_xx <- cov(X)
-    Sigma_yy <- cov(y)
-    Sigma_yx <- cov(y, X)
+    Sigma_xx <- stats::cov(X)
+    Sigma_yy <- stats::cov(y)
+    Sigma_yx <- stats::cov(y, X)
 
     V <- svd(Gamma_sq %*% tcrossprod(Sigma_yx %*% matpow(Sigma_xx, -1),
                Sigma_yx) %*% Gamma_sq)$u[, 1:rank, drop = F]
@@ -195,12 +209,12 @@ rr.regression <- function(X, y, u = NULL, rank, Gamma_type = "identity") {
     return(list(A = A, B = B, C = C, D = D, mu = mu))
   }
 
-  Sigma_xx <- cov(X)
-  Sigma_yy <- cov(y)
-  Sigma_uu <- cov(u)
-  Sigma_yx <- cov(y, X)
-  Sigma_xu <- cov(X, u)
-  Sigma_yu <- cov(y, u)
+  Sigma_xx <- stats::cov(X)
+  Sigma_yy <- stats::cov(y)
+  Sigma_uu <- stats::cov(u)
+  Sigma_yx <- stats::cov(y, X)
+  Sigma_xu <- stats::cov(X, u)
+  Sigma_yu <- stats::cov(y, u)
 
   Sigma_yx.u <- Sigma_yx - tcrossprod(Sigma_yu  %*% matpow(Sigma_uu, -1), Sigma_xu)
   Sigma_xx.u <- Sigma_xx - tcrossprod(Sigma_xu %*% matpow(Sigma_uu, -1), Sigma_xu)

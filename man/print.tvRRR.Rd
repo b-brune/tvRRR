@@ -4,10 +4,10 @@
 \alias{print.tvRRR}
 \title{Print Method for tvRRR object}
 \usage{
-\method{print}{tvRRR}(kf, ...)
+\method{print}{tvRRR}(x, ...)
 }
 \arguments{
-\item{kf}{an object of class \code{tvRRR}}
+\item{x}{an object of class \code{tvRRR}}
 
 \item{...}{ignored}
 }

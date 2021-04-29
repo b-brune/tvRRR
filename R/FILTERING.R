@@ -76,16 +76,16 @@ eval_tvRRR <- function(X,
                        model = "A",
                        alpha,
                        beta,
+                       Gamma = NULL,
                        Omega,
                        Sigma,
-                       P_00,
-                       ...) {
+                       P_00) {
 
   if (model == "A") kf <- filter_modelA(X = X, y = y, u = u, alpha_00 = alpha, beta = beta, d = d, P_00 = P_00,
-                                        Omega = Omega, Sigma = Sigma, ...)
+                                        Omega = Omega, Sigma = Sigma, Gamma = Gamma)
 
   if (model == "B") kf <- filter_modelB(X = X, y = y, u = u, alpha = alpha, beta_00 = t(beta), d = d, P_00 = P_00,
-                                        Omega = Omega, Sigma = Sigma, ...)
+                                        Omega = Omega, Sigma = Sigma, Gamma = Gamma)
 
   class(kf) <- "tvRRR"
 
@@ -223,8 +223,7 @@ filter_modelB <- function(X, y, u = NULL,
                           P_00, Sigma, Omega,
                           beta_00, alpha, Gamma = NULL,
                           d,
-                          return_covariances = TRUE,
-                          Gamma_rrr = "identity") {
+                          return_covariances = TRUE) {
 
   t <- nrow(y)
   p <- ncol(y)

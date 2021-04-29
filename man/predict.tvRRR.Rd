@@ -4,10 +4,10 @@
 \alias{predict.tvRRR}
 \title{Predict method for tvRRR object}
 \usage{
-\method{predict}{tvRRR}(kf, newdata = NULL, silent = FALSE, ...)
+\method{predict}{tvRRR}(object, newdata = NULL, silent = FALSE, ...)
 }
 \arguments{
-\item{kf}{object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function}
+\item{object}{object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function}
 
 \item{newdata}{can be specified differently with differing behavior: \itemize{
 \item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called and

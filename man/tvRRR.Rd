@@ -110,8 +110,8 @@ Both models are fitted by an EM-algorithm. The actual model fitting happens in
 if \code{select_rank = TRUE} performs model selection with BIC. Here, \code{d_max} denotes
 the maximum dimension that should be fitted. If \code{d_max = NULL}, \code{d} is interpreted
 as \code{d_max}. \code{tvRRR} determines starting values automatically, but also allows for
-manually handing over appropriate starting values. For details, also see \link{fit_modelA()} and
-\link{fit_modelB()}.
+manually handing over appropriate starting values. For details, also see \code{\link{fit_modelA}()}and
+\code{\link{fit_modelB}()}.
 
 Arguments that can be handed over to guide the behavior of the algorithm are
 
@@ -156,10 +156,6 @@ Furthermore:
 
 \code{Omega_diagonal} logical, indicates whether Omega is assumed to be a
 diagonal matrix (advisable if p is large)
-}
-\examples{
-
-
 }
 \seealso{
 \code{\link[tvRRR]{fit_modelA}}, \code{\link[tvRRR]{fit_modelB}}

@@ -7,7 +7,7 @@
 
 #' Calculate fitted values from tvRRR object
 #'
-#' @param kf an object of class \code{tvRRR}
+#' @param object an object of class \code{tvRRR}
 #' @param type either \code{filtered} or \code{smoothed}, defaults to filtered
 #' @param model \code{"A"} or \code{"B"}, can be handed over, but otherwise is determined
 #' automatically from the \code{tvRRR} object
@@ -15,7 +15,9 @@
 #'
 #' @export
 
-fitted.tvRRR <- function(kf, type = "filtered", model, ...) {
+fitted.tvRRR <- function(object, type = "filtered", model, ...) {
+
+  kf <- object
 
   if (missing(model)) model <- ifelse(is.null(kf$parameters$alpha), "A", "B")
 
@@ -50,13 +52,15 @@ fitted.tvRRR <- function(kf, type = "filtered", model, ...) {
 
 #' Print Method for tvRRR object
 #'
-#' @param kf an object of class \code{tvRRR}
+#' @param x an object of class \code{tvRRR}
 #' @param ... ignored
 #'
 #' @returns A short summary of the \code{tvRRR} object.
 #'
 #' @export
-print.tvRRR <- function(kf, ...) {
+print.tvRRR <- function(x, ...) {
+
+  kf <- x
 
   d <- ifelse(is.null(kf$parameters$alpha), dim(kf$parameters$beta)[2], dim(kf$parameters$alpha)[2])
   model <- ifelse(is.null(kf$parameters$alpha), "A", "B")
@@ -75,7 +79,7 @@ print.tvRRR <- function(kf, ...) {
   cat("\n",
       "Proportion of variance explained per time series: \n")
 
-  vars <- colMeans((fitted.tvRRR(kf) - kf$data$y)^2) / apply(kf$data$y, 2, var)
+  vars <- colMeans((fitted.tvRRR(kf) - kf$data$y)^2) / apply(kf$data$y, 2, stats::var)
 
   if (!is.null(colnames(kf$data$y))) names(vars) <- colnames(kf$data$y)
 
@@ -83,7 +87,7 @@ print.tvRRR <- function(kf, ...) {
 }
 
 #' Predict method for tvRRR object
-#' @param kf object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function
+#' @param object object of class tvRRR as returned by \code{\link[tvRRR]{tvRRR}()} function
 #' @param newdata can be specified differently with differing behavior: \itemize{
 #'                \item if \code{NULL}, the \code{\link[tvRRR]{fitted.tvRRR}()} method is called and
 #'                fitted values for the initial data are calculated
@@ -102,7 +106,9 @@ print.tvRRR <- function(kf, ...) {
 #' @export
 
 
-predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE, ...) {
+predict.tvRRR <- function(object, newdata = NULL, silent = FALSE, ...) {
+
+  kf <- object
 
   if (is.null(newdata)) return(fitted.tvRRR(kf))
 
@@ -195,7 +201,7 @@ predict.tvRRR <- function(kf, newdata = NULL, silent = FALSE, ...) {
 
 ## ############################################################################
 ##
-## AIC and BIC information criteria
+## BIC information criterion
 ##
 ## ############################################################################
 
@@ -215,7 +221,7 @@ BIC_tvRRR <- function(kf, d, model = "A", ...) {
 
 #' @keywords internal
 MSFE_tvRRR <- function(kf, newdata = NULL, model = "A") {
-  yhat <- predict(kf, newdata = newdata)
+  yhat <- stats::predict(kf, newdata = newdata)
   mean((newdata$y - yhat)^2)
 }
 
