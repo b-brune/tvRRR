@@ -83,10 +83,6 @@ fit
 #>              [,1]         [,2]
 #> [1,]  0.047435252 -0.003688764
 #> [2,] -0.003688764  0.086516325
-#> 
-#>  Proportion of variance explained per time series: 
-#>           [,1]      [,2]      [,3]      [,4]      [,5]
-#> [1,] 0.4795375 0.5628192 0.7748703 0.5245667 0.4412078
 ```
 
 `tvRRR()` returns a list of the filtered time-varying parameters
