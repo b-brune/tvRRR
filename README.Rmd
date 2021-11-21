@@ -37,7 +37,7 @@ devtools::install_github("b-brune/tvRRR")
 
 ## Model
 
-The model that is fitted is a reduced-rank regression with time-varying coefficient matrices. We implement two types of time-variation, called model (A) and model (B):
+We fit a reduced-rank regression with time-varying coefficient matrices. We implement two types of time-variation, called model (A) and model (B): 
 
 \[(A) \quad y_t = \alpha_t\beta'x_t + \Gamma{u}_t + \varepsilon_t\]
 

@@ -28,9 +28,9 @@ devtools::install_github("b-brune/tvRRR")
 
 ## Model
 
-The model that is fitted is a reduced-rank regression with time-varying
-coefficient matrices. We implement two types of time-variation, called
-model (A) and model (B):
+We fit a reduced-rank regression with time-varying coefficient matrices.
+We implement two types of time-variation, called model (A) and model
+(B):
 
 (*A*)  *y*<sub>*t*</sub> = *α*<sub>*t*</sub>*β*′*x*<sub>*t*</sub> + *Γ**u*<sub>*t*</sub> + *ε*<sub>*t*</sub>
 
@@ -83,10 +83,6 @@ fit
 #>              [,1]         [,2]
 #> [1,]  0.047435252 -0.003688764
 #> [2,] -0.003688764  0.086516325
-#> 
-#>  Proportion of variance explained per time series: 
-#>           [,1]      [,2]      [,3]      [,4]      [,5]
-#> [1,] 0.4795375 0.5628192 0.7748703 0.5245667 0.4412078
 ```
 
 `tvRRR()` returns a list of the filtered time-varying parameters

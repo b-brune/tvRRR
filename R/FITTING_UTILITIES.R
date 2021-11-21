@@ -76,14 +76,14 @@ print.tvRRR <- function(x, ...) {
 
   print(kf$parameters$Sigma)
 
-  cat("\n",
-      "Proportion of variance explained per time series: \n")
-
-  vars <- colMeans((fitted.tvRRR(kf) - kf$data$y)^2) / apply(kf$data$y, 2, stats::var)
-
-  if (!is.null(colnames(kf$data$y))) names(vars) <- colnames(kf$data$y)
-
-  print(t(vars))
+  # cat("\n",
+  #     "Proportion of variance explained per time series: \n")
+  #
+  # vars <- colMeans((fitted.tvRRR(kf) - kf$data$y)^2) / apply(kf$data$y, 2, stats::var)
+  #
+  # if (!is.null(colnames(kf$data$y))) names(vars) <- colnames(kf$data$y)
+  #
+  # print(t(vars))
 }
 
 #' Predict method for tvRRR object
