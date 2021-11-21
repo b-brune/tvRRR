@@ -1,12 +1,14 @@
 Package: tvRRR
-Title: Time-varying reduced rank regression using state-space models
+Title: Time-varying reduced-rank regression using state-space models
 Version: 0.0.0.9000
-Authors@R: 
+Authors@R: c(
     person(given = "Barbara",
            family = "Brune",
            role = c("aut", "cre"),
-           email = "barbara.brune@tuwien.ac.at")
-Description: This package implements the time-varying reduced rank regression (tvRRR)
+           email = "barbara.brune@tuwien.ac.at"),
+    person(given = "Wolfgang", family = "Scherrer", role = c("ctb")),
+    person(given = "Efstathia", family = "Bura", role = c("ctb")))
+Description: This package implements the time-varying reduced-rank regression (tvRRR)
   as presented in Brune, Scherrer and Bura, 2021+.
 License: MIT + file LICENSE
 Encoding: UTF-8

@@ -675,7 +675,7 @@ fit_modelB <- function(X, y, u = NULL, d,
 
   # Likelihoods at start of algorithm:
   loglik[1] <- X_eval_lik(kf = kf, Omega = Omega, alpha = alpha,
-                          d = d, X = X, y = y)
+                          d = d, X = X, y = y, Gamma = Gamma)
   Q[1] <- update$Q
 
   # Run the EM-algorithm:
